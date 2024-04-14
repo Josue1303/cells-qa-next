@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require("express");
 const next = require("next");
 const { setupWebDriver, runTest } = require("./selenium");
@@ -9,10 +10,13 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
   const server = express();
 
+  server.use(express.json());
+
   server.post("/api/run-test", async (req, res) => {
     try {
+      console.log("Este es el body: " + req.body);
       const driver = await setupWebDriver();
-      await runTest(driver);
+      await runTest(driver, req.body.email, req.body.password);
       res.status(200).send("Prueba completada con éxito.");
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);

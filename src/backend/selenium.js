@@ -1,3 +1,4 @@
+// backend/selenium.js
 const { Builder, By } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
 
@@ -14,32 +15,27 @@ async function setupWebDriver() {
   return driver;
 }
 
-async function runTest(driver) {
+async function runTest(driver, email, password) {
   try {
-    await driver.get(
-      "https://admin:admin@the-internet.herokuapp.com/basic_auth"
-    ); // Navegar a una URL
+    await driver.get("https://facebook.com"); // Navegar a una URL
     // Ejemplo de pasos de prueba:
+
+    console.log(email);
+    console.log(password);
     // Iniciar sesión
-    title = await driver.getTitle();
-    let successMessage = await driver.findElement(By.css(".example p"));
+    const emailTextBox = await driver.findElement(By.name("email"));
+    await emailTextBox.sendKeys(email);
 
-    // Verify the success message
-    let expectedMessage =
-      "Congratulations! You must have the proper credentials.";
+    const passwordTextBox = await driver.findElement(By.name("pass"));
+    await passwordTextBox.sendKeys(password);
 
-    if ((await successMessage.getText()) === expectedMessage) {
-      console.log("Test scenario passed!");
-    } else {
-      console.log(
-        "Test scenario failed: Success message does not match the expected message."
-      );
-    }
+    const loginButton = await driver.findElement(By.name("login"));
+    await loginButton.click();
+
     console.log("Prueba completada con éxito.");
   } catch (error) {
     console.error("Error al ejecutar la prueba:", error);
     throw error;
-  } finally {
   }
 }
 
