@@ -15,22 +15,25 @@ async function setupWebDriver() {
   return driver;
 }
 
-async function runTest(driver, email, password) {
+async function runTest(driver, parameters) {
+  const { textInput, searchKey, searchBy, action } = parameters;
+
   try {
     await driver.get("https://facebook.com"); // Navegar a una URL
     // Ejemplo de pasos de prueba:
-
-    console.log(email);
-    console.log(password);
-    // Iniciar sesión
-    const emailTextBox = await driver.findElement(By.name("email"));
-    await emailTextBox.sendKeys(email);
-
-    const passwordTextBox = await driver.findElement(By.name("pass"));
-    await passwordTextBox.sendKeys(password);
-
-    const loginButton = await driver.findElement(By.name("login"));
-    await loginButton.click();
+    // Dependiendo de la acción, realizar la acción correspondiente
+    if (action === "sendKeys") {
+      await driver.findElement(By[searchBy](searchKey)).sendKeys(textInput);
+    } else if (action === "click") {
+      await driver.findElement(By[searchBy](searchKey)).click();
+    } else if (action === "getText") {
+      const elementText = await driver
+        .findElement(By[searchBy](searchKey))
+        .getText();
+      console.log("Texto del elemento:", elementText);
+    } else {
+      console.log("Acción no válida:", action);
+    }
 
     console.log("Prueba completada con éxito.");
   } catch (error) {
