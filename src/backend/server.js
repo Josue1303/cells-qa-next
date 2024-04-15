@@ -14,7 +14,8 @@ app.prepare().then(() => {
 
   server.post("/api/run-test", async (req, res) => {
     try {
-      console.log("Este es el body: " + req.body);
+      console.log("Este es el body:", JSON.stringify(req.body, null, 2));
+
       const driver = await setupWebDriver();
       await runTest(driver, req.body);
       res.status(200).send("Prueba completada con éxito.");

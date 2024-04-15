@@ -1,12 +1,12 @@
 // components/TestButton.jsx
 "use client";
 import axios from "axios";
-import React, { useState } from "react";
+import React from "react";
 
-const TestButton = ({ testParameters }) => {
+const TestButton = ({ instructions }) => {
   const handleTestButtonClick = async () => {
     try {
-      await axios.post("/api/run-test", testParameters);
+      await axios.post("/api/run-test", { instructions });
       alert("Prueba completada con éxito.");
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);

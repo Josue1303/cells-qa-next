@@ -1,71 +1,87 @@
 "use client";
 import React, { useState } from "react";
 
-const Selector = ({ onTestParametersChange }) => {
-  const [textInput, setTextInput] = useState("");
-  const [searchKey, setSearchKey] = useState("");
-  const [searchBy, setSearchBy] = useState("");
-  const [action, setAction] = useState("");
+const Selector = ({ onInstructionsChange }) => {
+  const [instructions, setInstructions] = useState([]);
 
-  const handleTextChange = (e) => {
-    setTextInput(e.target.value);
+  const addInstruction = () => {
+    setInstructions([
+      ...instructions,
+      { textInput: "", searchKey: "", searchBy: "", action: "" },
+    ]);
   };
 
-  const handleSearchKeyChange = (e) => {
-    setSearchKey(e.target.value);
+  const handleTextChange = (index, e) => {
+    const newInstructions = [...instructions];
+    newInstructions[index].textInput = e.target.value;
+    setInstructions(newInstructions);
   };
 
-  const handleSearchByChange = (e) => {
-    setSearchBy(e.target.value);
+  const handleSearchKeyChange = (index, e) => {
+    const newInstructions = [...instructions];
+    newInstructions[index].searchKey = e.target.value;
+    setInstructions(newInstructions);
   };
 
-  const handleActionChange = (e) => {
-    setAction(e.target.value);
+  const handleSearchByChange = (index, e) => {
+    const newInstructions = [...instructions];
+    newInstructions[index].searchBy = e.target.value;
+    setInstructions(newInstructions);
   };
 
-  const handleTestParametersChange = () => {
-    onTestParametersChange({ textInput, searchKey, searchBy, action });
-    console.log(textInput, searchKey, searchBy, action);
+  const handleActionChange = (index, e) => {
+    const newInstructions = [...instructions];
+    newInstructions[index].action = e.target.value;
+    setInstructions(newInstructions);
+  };
+
+  const handleInstructionsChange = () => {
+    onInstructionsChange(instructions);
   };
 
   return (
     <div>
-      <h3>Valor:</h3>
-      <input
-        type="text"
-        placeholder="Ingrese el texto"
-        value={textInput}
-        onChange={handleTextChange}
-      />
-
-      <h3>Clave de búsqueda:</h3>
-      <input
-        type="text"
-        placeholder="Ingrese la clave"
-        value={searchKey}
-        onChange={handleSearchKeyChange}
-      />
-      <br />
-
-      <h3>Buscar por:</h3>
-      <select value={searchBy} onChange={handleSearchByChange}>
-        <option value="">Seleccione una opción</option>
-        <option value="css">css</option>
-        <option value="id">id</option>
-        <option value="name">name</option>
-      </select>
-      <br />
-
-      <h3>Acción:</h3>
-      <select value={action} onChange={handleActionChange}>
-        <option value="">Seleccione una opción</option>
-        <option value="sendKeys">Llenar campo</option>
-        <option value="click">Click</option>
-        <option value="getText">Comparar texto</option>
-      </select>
-
-      <br />
-      <button onClick={handleTestParametersChange}>Enviar Parámetros</button>
+      <h1>Instrucciones:</h1>
+      {instructions.map((instruction, index) => (
+        <div key={index}>
+          <h3>Valor:</h3>
+          <input
+            type="text"
+            placeholder="Ingrese el texto"
+            value={instruction.textInput}
+            onChange={(e) => handleTextChange(index, e)}
+          />
+          <h3>Clave de búsqueda:</h3>
+          <input
+            type="text"
+            placeholder="Ingrese la clave"
+            value={instruction.searchKey}
+            onChange={(e) => handleSearchKeyChange(index, e)}
+          />
+          <h3>Buscar por:</h3>
+          <select
+            value={instruction.searchBy}
+            onChange={(e) => handleSearchByChange(index, e)}
+          >
+            <option value="">Seleccione una opción</option>
+            <option value="css">css</option>
+            <option value="id">id</option>
+            <option value="name">name</option>
+          </select>
+          <h3>Acción:</h3>
+          <select
+            value={instruction.action}
+            onChange={(e) => handleActionChange(index, e)}
+          >
+            <option value="">Seleccione una opción</option>
+            <option value="sendKeys">Llenar campo</option>
+            <option value="click">Click</option>
+            <option value="getText">Comparar texto</option>
+          </select>
+        </div>
+      ))}
+      <button onClick={addInstruction}>Agregar Instrucción</button>
+      <button onClick={handleInstructionsChange}>Enviar Instrucciones</button>
     </div>
   );
 };
