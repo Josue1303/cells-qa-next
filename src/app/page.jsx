@@ -1,3 +1,4 @@
+//page.jsx
 "use client";
 import Selector from "@/components/Selector";
 import TestButton from "@/components/TestButton";
@@ -23,7 +24,6 @@ export default function Home() {
           onInstructionsChange={handleInstructionsChange}
           onUrlChange={handleUrlChange}
         />
-        <TestButton instructions={instructions} url={url} />
       </div>
     </main>
   );
