@@ -15,15 +15,12 @@ async function setupWebDriver() {
   return driver;
 }
 
-async function runTest(driver, instructions) {
+async function runTest(driver, instructions, url) {
   try {
-    await driver.get("https://facebook.com"); // Navegar a una URL
+    await driver.get(url); // Navegar a una URL
     // Ejemplo de pasos de prueba:
     // Dependiendo de la acción, realizar la acción correspondiente
-    const steps = instructions.instructions; // Accede al array de instrucciones dentro del objeto
-
-    for (const instruction of steps) {
-      // Itera sobre el array de instrucciones
+    for (const instruction of instructions) {
       const { textInput, searchKey, searchBy, action } = instruction;
       if (action === "sendKeys") {
         await driver.findElement(By[searchBy](searchKey)).sendKeys(textInput);
@@ -33,7 +30,11 @@ async function runTest(driver, instructions) {
         const elementText = await driver
           .findElement(By[searchBy](searchKey))
           .getText();
-        console.log("Texto del elemento:", elementText);
+        if (elementText == textInput) {
+          console.log("Si son iguales");
+        } else {
+          console.log("No son iguales chamaque pendeje");
+        }
       } else {
         console.log("Acción no válida:", action);
       }

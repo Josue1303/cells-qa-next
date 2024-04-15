@@ -1,14 +1,20 @@
 "use client";
 import React, { useState } from "react";
 
-const Selector = ({ onInstructionsChange }) => {
+const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [instructions, setInstructions] = useState([]);
+  const [url, setUrl] = useState("");
 
   const addInstruction = () => {
     setInstructions([
       ...instructions,
       { textInput: "", searchKey: "", searchBy: "", action: "" },
     ]);
+  };
+
+  const handleUrlChange = (e) => {
+    setUrl(e.target.value);
+    onUrlChange(e.target.value);
   };
 
   const handleTextChange = (index, e) => {
@@ -41,6 +47,15 @@ const Selector = ({ onInstructionsChange }) => {
 
   return (
     <div>
+      <h1>URL:</h1>
+      <label htmlFor="urlInput">URL:</label>
+      <input
+        type="text"
+        id="urlInput"
+        value={url}
+        onChange={handleUrlChange}
+        placeholder="Ingrese la URL"
+      />
       <h1>Instrucciones:</h1>
       {instructions.map((instruction, index) => (
         <div key={index}>

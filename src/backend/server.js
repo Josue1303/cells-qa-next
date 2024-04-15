@@ -17,7 +17,7 @@ app.prepare().then(() => {
       console.log("Este es el body:", JSON.stringify(req.body, null, 2));
 
       const driver = await setupWebDriver();
-      await runTest(driver, req.body);
+      await runTest(driver, req.body.instructions, req.body.url);
       res.status(200).send("Prueba completada con éxito.");
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
