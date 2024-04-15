@@ -160,6 +160,9 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
             placeholder="Ingrese el texto"
             value={instruction.textInput}
             onChange={(e) => handleTextChange(index, e)}
+            className={
+              instruction.textInput === "" && error ? "input-error" : ""
+            }
             disabled={
               instruction.action === "click" || instruction.action === ""
             }
