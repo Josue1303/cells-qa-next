@@ -130,71 +130,140 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
   return (
     <div>
-      <h1>URL:</h1>
-      <label htmlFor="urlInput">URL:</label>
-      <input
-        type="text"
-        id="urlInput"
-        value={url}
-        onChange={handleUrlChange}
-        placeholder="Ingrese la URL"
-      />
-      {error2 && <p style={{ color: "red" }}>{error2}</p>}
-      <h1>Instrucciones:</h1>
-      {instructions.map((instruction, index) => (
-        <div key={index}>
-          <h1>{index + 1}</h1>
-          <h3>Acción:</h3>
-          <select
-            value={instruction.action}
-            onChange={(e) => handleActionChange(index, e)}
-          >
-            <option value="">Seleccione una opción</option>
-            <option value="sendKeys">Llenar campo</option>
-            <option value="click">Click</option>
-            <option value="getText">Comparar texto</option>
-          </select>
-          <h3>Valor:</h3>
-          <input
-            type="text"
-            placeholder="Ingrese el texto"
-            value={instruction.textInput}
-            onChange={(e) => handleTextChange(index, e)}
-            className={
-              instruction.textInput === "" && error ? "input-error" : ""
-            }
-            disabled={
-              instruction.action === "click" || instruction.action === ""
-            }
-          />
-          <h3>Clave de búsqueda:</h3>
-          <input
-            type="text"
-            placeholder="Ingrese la clave"
-            value={instruction.searchKey}
-            onChange={(e) => handleSearchKeyChange(index, e)}
-            disabled={instruction.action === ""}
-          />
-          <h3>Buscar por:</h3>
-          <select
-            value={instruction.searchBy}
-            onChange={(e) => handleSearchByChange(index, e)}
-            disabled={instruction.action === ""}
-          >
-            <option value="">Seleccione una opción</option>
-            <option value="css">css</option>
-            <option value="id">id</option>
-            <option value="name">name</option>
-          </select>
-          <br />
-          <button onClick={() => removeInstruction(index)}>Eliminar</button>
-        </div>
-      ))}
+      <div className="flex justify-center items-center p-5">
+        <label htmlFor="urlInput" className="px-5">
+          URL:
+        </label>
+        <input
+          type="text"
+          id="urlInput"
+          value={url}
+          onChange={handleUrlChange}
+          placeholder="Ingrese la URL"
+          className={
+            url === "" && error2 != "" ? "input-error" : "input" + " px-5"
+          }
+        />
+        {error2 && <p style={{ color: "red" }}>{error2}</p>}
+      </div>
+
+      <h2>Instrucciones:</h2>
+      <div className="">
+        {instructions.map((instruction, index) => (
+          <div key={index} className=" py-2 justify-between w-full">
+            <div className="flex justify-center">
+              <div className="flex items-center w-10/12">
+                <h3 className="font-bold px-3">{index + 1}</h3>
+                <div className="px-3">
+                  <h3>Acción:</h3>
+                  <select
+                    value={instruction.action}
+                    onChange={(e) => handleActionChange(index, e)}
+                    className={
+                      instruction.action === "" && error != ""
+                        ? "input-error"
+                        : "input"
+                    }
+                  >
+                    <option value="">Seleccione una opción</option>
+                    <option value="sendKeys">Llenar campo</option>
+                    <option value="click">Click</option>
+                    <option value="getText">Comparar texto</option>
+                  </select>
+                </div>
+                <div
+                  className="px-3"
+                  style={{
+                    display:
+                      instruction.action === "click" ||
+                      instruction.action === ""
+                        ? "none"
+                        : "block",
+                  }}
+                >
+                  <h3>Valor:</h3>
+                  <input
+                    type="text"
+                    placeholder="Ingrese el texto"
+                    value={instruction.textInput}
+                    onChange={(e) => handleTextChange(index, e)}
+                    className={
+                      instruction.textInput === "" &&
+                      error != "" &&
+                      (instruction.action == "sendKeys" ||
+                        instruction.action == "getText")
+                        ? "input-error"
+                        : "input"
+                    }
+                  />
+                </div>
+                <div
+                  className="px-3"
+                  style={{
+                    display: instruction.action === "" ? "none" : "block",
+                  }}
+                >
+                  <h3>Clave de búsqueda:</h3>
+                  <input
+                    type="text"
+                    placeholder="Ingrese la clave"
+                    value={instruction.searchKey}
+                    onChange={(e) => handleSearchKeyChange(index, e)}
+                    className={
+                      instruction.searchKey === "" &&
+                      error != "" &&
+                      instruction.action != ""
+                        ? "input-error"
+                        : "input"
+                    }
+                  />
+                </div>
+                <div
+                  className="px-3"
+                  style={{
+                    display: instruction.action === "" ? "none" : "block",
+                  }}
+                >
+                  <h3>Buscar por:</h3>
+                  <select
+                    value={instruction.searchBy}
+                    onChange={(e) => handleSearchByChange(index, e)}
+                    className={
+                      instruction.searchBy === "" &&
+                      error != "" &&
+                      instruction.action != ""
+                        ? "input-error"
+                        : "input"
+                    }
+                  >
+                    <option value="">Seleccione una opción</option>
+                    <option value="css">css</option>
+                    <option value="id">id</option>
+                    <option value="name">name</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <button
+                  onClick={() => removeInstruction(index)}
+                  className="button-delete"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <br />
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <button onClick={addInstruction}>Agregar Instrucción</button>
-      <button onClick={handleInstructionsAndTest}>Enviar Instrucciones</button>
+      <button onClick={addInstruction} className="button mx-5">
+        Agregar Instrucción
+      </button>
+      <button onClick={handleInstructionsAndTest} className="button-send mx-5">
+        Enviar Instrucciones
+      </button>
     </div>
   );
 };

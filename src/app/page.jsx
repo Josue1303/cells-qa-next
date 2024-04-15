@@ -17,14 +17,12 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>
-        <h1>Página Principal</h1>
-        <Selector
-          onInstructionsChange={handleInstructionsChange}
-          onUrlChange={handleUrlChange}
-        />
-      </div>
+    <main className="min-h-screen p-20">
+      <h1 className="text-center">Página Principal</h1>
+      <Selector
+        onInstructionsChange={handleInstructionsChange}
+        onUrlChange={handleUrlChange}
+      />
     </main>
   );
 }
