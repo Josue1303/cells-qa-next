@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-20">
-      <h1 className="text-center">Página Principal</h1>
+      <h1 className="text-center">Pruebas</h1>
       <Selector
         onInstructionsChange={handleInstructionsChange}
         onUrlChange={handleUrlChange}

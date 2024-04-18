@@ -4,10 +4,13 @@ import axios from "axios";
 import React, { useState } from "react";
 
 const Selector = ({ onInstructionsChange, onUrlChange }) => {
-  const [instructions, setInstructions] = useState([]);
+  const [instructions, setInstructions] = useState([
+    { textInput: "", searchKey: "", searchBy: "", action: "" }, // Instrucción predeterminada
+  ]);
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
+  const [status, setStatus] = useState("");
 
   const addInstruction = () => {
     setInstructions([
@@ -130,8 +133,8 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
   return (
     <div>
-      <div className="flex justify-center items-center p-5">
-        <label htmlFor="urlInput" className="px-5">
+      <div className="flex justify-end items-center py-5 mr-24">
+        <label htmlFor="urlInput" className="mr-5">
           URL:
         </label>
         <input
@@ -147,115 +150,143 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         {error2 && <p style={{ color: "red" }}>{error2}</p>}
       </div>
 
-      <h2>Instrucciones:</h2>
-      <div className="">
-        {instructions.map((instruction, index) => (
-          <div key={index} className=" py-2 justify-between w-full">
-            <div className="flex justify-center">
-              <div className="flex items-center w-10/12">
-                <h3 className="font-bold px-3">{index + 1}</h3>
-                <div className="px-3">
-                  <h3>Acción:</h3>
-                  <select
-                    value={instruction.action}
-                    onChange={(e) => handleActionChange(index, e)}
-                    className={
-                      instruction.action === "" && error != ""
-                        ? "input-error"
-                        : "input"
-                    }
+      <h2 className="my-5">Instrucciones:</h2>
+      <div className="flex justify-center">
+        <div className="bg-[#2a2a2a] rounded-md mx-10 w-full">
+          {instructions.map((instruction, index) => (
+            <div key={index} className="justify-between w-full my-5">
+              <div className="flex justify-center">
+                <div className="flex items-center w-full">
+                  <h3 className="font-bold  mx-5">{index + 1}</h3>
+                  <div className="px-3">
+                    <h3>Acción:</h3>
+                    <select
+                      value={instruction.action}
+                      onChange={(e) => handleActionChange(index, e)}
+                      className={
+                        instruction.action === "" && error != ""
+                          ? "input-error"
+                          : "input"
+                      }
+                    >
+                      <option value="">Seleccione una opción</option>
+                      <option value="sendKeys">Llenar campo</option>
+                      <option value="click">Click</option>
+                      <option value="getText">Comparar texto</option>
+                    </select>
+                  </div>
+                  <div
+                    className="px-3"
+                    style={{
+                      display:
+                        instruction.action === "click" ||
+                        instruction.action === ""
+                          ? "none"
+                          : "block",
+                    }}
                   >
-                    <option value="">Seleccione una opción</option>
-                    <option value="sendKeys">Llenar campo</option>
-                    <option value="click">Click</option>
-                    <option value="getText">Comparar texto</option>
-                  </select>
-                </div>
-                <div
-                  className="px-3"
-                  style={{
-                    display:
-                      instruction.action === "click" ||
-                      instruction.action === ""
-                        ? "none"
-                        : "block",
-                  }}
-                >
-                  <h3>Valor:</h3>
-                  <input
-                    type="text"
-                    placeholder="Ingrese el texto"
-                    value={instruction.textInput}
-                    onChange={(e) => handleTextChange(index, e)}
-                    className={
-                      instruction.textInput === "" &&
-                      error != "" &&
-                      (instruction.action == "sendKeys" ||
-                        instruction.action == "getText")
-                        ? "input-error"
-                        : "input"
-                    }
-                  />
-                </div>
-                <div
-                  className="px-3"
-                  style={{
-                    display: instruction.action === "" ? "none" : "block",
-                  }}
-                >
-                  <h3>Clave de búsqueda:</h3>
-                  <input
-                    type="text"
-                    placeholder="Ingrese la clave"
-                    value={instruction.searchKey}
-                    onChange={(e) => handleSearchKeyChange(index, e)}
-                    className={
-                      instruction.searchKey === "" &&
-                      error != "" &&
-                      instruction.action != ""
-                        ? "input-error"
-                        : "input"
-                    }
-                  />
-                </div>
-                <div
-                  className="px-3"
-                  style={{
-                    display: instruction.action === "" ? "none" : "block",
-                  }}
-                >
-                  <h3>Buscar por:</h3>
-                  <select
-                    value={instruction.searchBy}
-                    onChange={(e) => handleSearchByChange(index, e)}
-                    className={
-                      instruction.searchBy === "" &&
-                      error != "" &&
-                      instruction.action != ""
-                        ? "input-error"
-                        : "input"
-                    }
+                    <h3>Valor:</h3>
+                    <input
+                      type="text"
+                      placeholder="Ingrese el texto"
+                      value={instruction.textInput}
+                      onChange={(e) => handleTextChange(index, e)}
+                      className={
+                        instruction.textInput === "" &&
+                        error != "" &&
+                        (instruction.action == "sendKeys" ||
+                          instruction.action == "getText")
+                          ? "input-error"
+                          : "input "
+                      }
+                    />
+                  </div>
+                  <div
+                    className="px-3"
+                    style={{
+                      display: instruction.action === "" ? "none" : "block",
+                    }}
                   >
-                    <option value="">Seleccione una opción</option>
-                    <option value="css">css</option>
-                    <option value="id">id</option>
-                    <option value="name">name</option>
-                  </select>
+                    <h3>Clave de búsqueda:</h3>
+                    <input
+                      type="text"
+                      placeholder="Ingrese la clave"
+                      value={instruction.searchKey}
+                      onChange={(e) => handleSearchKeyChange(index, e)}
+                      className={
+                        instruction.searchKey === "" &&
+                        error != "" &&
+                        instruction.action != ""
+                          ? "input-error"
+                          : "input"
+                      }
+                    />
+                  </div>
+                  <div
+                    className="px-3"
+                    style={{
+                      display: instruction.action === "" ? "none" : "block",
+                    }}
+                  >
+                    <h3>Buscar por:</h3>
+                    <select
+                      value={instruction.searchBy}
+                      onChange={(e) => handleSearchByChange(index, e)}
+                      className={
+                        instruction.searchBy === "" &&
+                        error != "" &&
+                        instruction.action != ""
+                          ? "input-error"
+                          : "input"
+                      }
+                    >
+                      <option value="">Seleccione una opción</option>
+                      <option value="css">css</option>
+                      <option value="id">id</option>
+                      <option value="name">name</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <button
-                  onClick={() => removeInstruction(index)}
-                  className="button-delete"
-                >
-                  Eliminar
-                </button>
+                <div className="flex items-center mr-5">
+                  <button
+                    onClick={() => removeInstruction(index)}
+                    className="button-delete"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+                <div className="mx-5">
+                  <h3>Status:</h3>
+                  <div
+                    className="px-2 text-center bg-green-500 rounded"
+                    style={{
+                      display: status === "" ? "none" : "block",
+                    }}
+                  >
+                    Pasado
+                  </div>
+                  <div
+                    className="px-2 text-center bg-red-500 rounded"
+                    style={{
+                      display: status === "" ? "none" : "block",
+                    }}
+                  >
+                    Fallado
+                  </div>
+                  <div
+                    className="px-2 text-center bg-gray-500 rounded"
+                    style={{
+                      display: status != "" ? "none" : "block",
+                    }}
+                  >
+                    NP
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-
       <br />
       {error && <p style={{ color: "red" }}>{error}</p>}
       <button onClick={addInstruction} className="button mx-5">
