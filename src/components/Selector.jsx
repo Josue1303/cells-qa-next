@@ -10,13 +10,14 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
-  const [status, setStatus] = useState("");
+  const [instructionResults, setInstructionResults] = useState(["NP"]);
 
   const addInstruction = () => {
     setInstructions([
       ...instructions,
       { textInput: "", searchKey: "", searchBy: "", action: "" },
     ]);
+    setInstructionResults([...instructionResults, "NP"]);
   };
 
   const handleUrlChange = (e) => {
@@ -74,6 +75,11 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     const newInstructions = [...instructions];
     newInstructions.splice(index, 1);
     setInstructions(newInstructions);
+
+    const newInstructionsResult = [...instructionResults];
+    newInstructionsResult.splice(index, 1);
+    setInstructionResults(newInstructionsResult);
+    console.log(newInstructionsResult);
   };
 
   const handleInstructionsAndTest = async () => {
@@ -121,7 +127,11 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
     // Envía las instrucciones y la URL al backend para ejecutar la automatización
     try {
-      await axios.post("/api/run-test", { instructions, url });
+      const response = await axios.post("/api/run-test", { instructions, url });
+      const results = response.data.results;
+
+      setInstructionResults(results);
+
       alert("Prueba completada con éxito.");
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
@@ -152,14 +162,25 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
       <h2 className="my-5">Instrucciones:</h2>
       <div className="flex justify-center">
-        <div className="bg-[#2a2a2a] rounded-md mx-10 w-full">
+        <div className="bg-white rounded-md mx-10 w-full">
+          <div className="flex mx-5 my-4">
+            <h3>No.</h3>
+            <div className="flex w-full">
+              <h3 className="w-2/12 mx-4 bg-white">Acción</h3>
+              <h3 className="w-2/12 mx-10 bg-white">Valor</h3>
+              <h3 className="w-2/12 mx-4 bg-white">Clave de búsqueda</h3>
+              <h3 className="w-2/12 mx-10 bg-white">Buscar por</h3>
+            </div>
+            <div>
+              <h3 className="mx-3">Status</h3>
+            </div>
+          </div>
           {instructions.map((instruction, index) => (
             <div key={index} className="justify-between w-full my-5">
               <div className="flex justify-center">
                 <div className="flex items-center w-full">
                   <h3 className="font-bold  mx-5">{index + 1}</h3>
                   <div className="px-3">
-                    <h3>Acción:</h3>
                     <select
                       value={instruction.action}
                       onChange={(e) => handleActionChange(index, e)}
@@ -169,7 +190,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                           : "input"
                       }
                     >
-                      <option value="">Seleccione una opción</option>
+                      <option value="">Seleccione una acción</option>
                       <option value="sendKeys">Llenar campo</option>
                       <option value="click">Click</option>
                       <option value="getText">Comparar texto</option>
@@ -185,10 +206,9 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                           : "block",
                     }}
                   >
-                    <h3>Valor:</h3>
                     <input
                       type="text"
-                      placeholder="Ingrese el texto"
+                      placeholder="Ingrese el valor a probar"
                       value={instruction.textInput}
                       onChange={(e) => handleTextChange(index, e)}
                       className={
@@ -207,10 +227,9 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                       display: instruction.action === "" ? "none" : "block",
                     }}
                   >
-                    <h3>Clave de búsqueda:</h3>
                     <input
                       type="text"
-                      placeholder="Ingrese la clave"
+                      placeholder="Ingrese la clave de búsqueda"
                       value={instruction.searchKey}
                       onChange={(e) => handleSearchKeyChange(index, e)}
                       className={
@@ -228,7 +247,6 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                       display: instruction.action === "" ? "none" : "block",
                     }}
                   >
-                    <h3>Buscar por:</h3>
                     <select
                       value={instruction.searchBy}
                       onChange={(e) => handleSearchByChange(index, e)}
@@ -255,28 +273,34 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                     Eliminar
                   </button>
                 </div>
-                <div className="mx-5">
-                  <h3>Status:</h3>
+                <div className="mx-5 flex items-center">
                   <div
-                    className="px-2 text-center bg-green-500 rounded"
+                    className="px-2 text-center bg-green-500 rounded text-[#FFFFFF] w-20 items r"
                     style={{
-                      display: status === "" ? "none" : "block",
+                      display:
+                        instructionResults[index] === "Passed"
+                          ? "block"
+                          : "none",
                     }}
                   >
                     Pasado
                   </div>
                   <div
-                    className="px-2 text-center bg-red-500 rounded"
+                    className="px-2 text-center bg-red-500 rounded  text-[#FFFFFF] w-20"
                     style={{
-                      display: status === "" ? "none" : "block",
+                      display:
+                        instructionResults[index] === "Failed"
+                          ? "block"
+                          : "none",
                     }}
                   >
                     Fallado
                   </div>
                   <div
-                    className="px-2 text-center bg-gray-500 rounded"
+                    className="px-2 text-center bg-gray-500 rounded  text-[#FFFFFF] w-20"
                     style={{
-                      display: status != "" ? "none" : "block",
+                      display:
+                        instructionResults[index] === "NP" ? "block" : "none",
                     }}
                   >
                     NP
