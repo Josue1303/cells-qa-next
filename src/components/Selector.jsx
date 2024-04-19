@@ -191,9 +191,9 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
             <h3>No.</h3>
             <div className="flex w-full">
               <h3 className="w-2/12 mx-4 bg-white">Acción</h3>
+              <h3 className="w-2/12 mx-10 bg-white">Búscar por</h3>
+              <h3 className="w-2/12 mx-6 bg-white">Clave de búsqueda</h3>
               <h3 className="w-2/12 mx-10 bg-white">Valor</h3>
-              <h3 className="w-2/12 mx-4 bg-white">Clave de búsqueda</h3>
-              <h3 className="w-2/12 mx-10 bg-white">Buscar por</h3>
             </div>
             <div>
               <h3 className="mx-3">Status</h3>
@@ -223,28 +223,27 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                   <div
                     className="px-3"
                     style={{
-                      display:
-                        instruction.action === "click" ||
-                        instruction.action === ""
-                          ? "none"
-                          : "block",
+                      display: instruction.action === "" ? "none" : "block",
                     }}
                   >
-                    <input
-                      type="text"
-                      placeholder="Ingrese el valor a probar"
-                      value={instruction.textInput}
-                      onChange={(e) => handleTextChange(index, e)}
+                    <select
+                      value={instruction.searchBy}
+                      onChange={(e) => handleSearchByChange(index, e)}
                       className={
-                        instruction.textInput === "" &&
+                        instruction.searchBy === "" &&
                         error != "" &&
-                        (instruction.action == "sendKeys" ||
-                          instruction.action == "getText")
+                        instruction.action != ""
                           ? "input-error"
-                          : "input "
+                          : "input"
                       }
-                    />
+                    >
+                      <option value="">Seleccione una opción</option>
+                      <option value="css">css</option>
+                      <option value="id">id</option>
+                      <option value="name">name</option>
+                    </select>
                   </div>
+
                   <div
                     className="px-3"
                     style={{
@@ -268,25 +267,27 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                   <div
                     className="px-3"
                     style={{
-                      display: instruction.action === "" ? "none" : "block",
+                      display:
+                        instruction.action === "click" ||
+                        instruction.action === ""
+                          ? "none"
+                          : "block",
                     }}
                   >
-                    <select
-                      value={instruction.searchBy}
-                      onChange={(e) => handleSearchByChange(index, e)}
+                    <input
+                      type="text"
+                      placeholder="Ingrese el valor a probar"
+                      value={instruction.textInput}
+                      onChange={(e) => handleTextChange(index, e)}
                       className={
-                        instruction.searchBy === "" &&
+                        instruction.textInput === "" &&
                         error != "" &&
-                        instruction.action != ""
+                        (instruction.action == "sendKeys" ||
+                          instruction.action == "getText")
                           ? "input-error"
-                          : "input"
+                          : "input "
                       }
-                    >
-                      <option value="">Seleccione una opción</option>
-                      <option value="css">css</option>
-                      <option value="id">id</option>
-                      <option value="name">name</option>
-                    </select>
+                    />
                   </div>
                 </div>
                 <div className="flex items-center mr-5">
@@ -350,7 +351,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         </div>
         <div className="flex justify-end w-8/12 items-center ">
           <h3>Overall</h3>
-          <div className="ml-5 flex items-center mr-8">
+          <div className="ml-5 flex items-center mr-10">
             <div
               className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2 mr-2"
               style={{
