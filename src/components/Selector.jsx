@@ -5,47 +5,53 @@ import React, { useState } from "react";
 
 const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [instructions, setInstructions] = useState([
-    { textInput: "", searchKey: "", searchBy: "", action: "" }, // Instrucción predeterminada
+    { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" }, // Instrucción predeterminada
   ]);
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
-  const [instructionResults, setInstructionResults] = useState(["NP"]);
+  const [overall, setOverall] = useState("NP");
 
   const addInstruction = () => {
     setInstructions([
       ...instructions,
-      { textInput: "", searchKey: "", searchBy: "", action: "" },
+      { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" },
     ]);
-    setInstructionResults([...instructionResults, "NP"]);
+    console.log(instructions);
+    setOverall("NP");
   };
 
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
     onUrlChange(e.target.value);
+    setOverall("NP");
   };
 
   const handleTextChange = (index, e) => {
     const newInstructions = [...instructions];
     newInstructions[index].textInput = e.target.value;
     setInstructions(newInstructions);
+    setOverall("NP");
   };
 
   const handleSearchKeyChange = (index, e) => {
     const newInstructions = [...instructions];
     newInstructions[index].searchKey = e.target.value;
     setInstructions(newInstructions);
+    setOverall("NP");
   };
 
   const handleSearchByChange = (index, e) => {
     const newInstructions = [...instructions];
     newInstructions[index].searchBy = e.target.value;
     setInstructions(newInstructions);
+    setOverall("NP");
   };
 
   const handleActionChange = (index, e) => {
     const newInstructions = [...instructions];
     const selectedAction = e.target.value;
+    setOverall("NP");
 
     if (selectedAction === "click") {
       // Si la acción seleccionada es "click", habilitar todos los campos excepto "Acción"
@@ -67,23 +73,16 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     setInstructions(newInstructions);
   };
 
-  const handleInstructionsChange = () => {
-    onInstructionsChange(instructions);
-  };
-
   const removeInstruction = (index) => {
     const newInstructions = [...instructions];
     newInstructions.splice(index, 1);
     setInstructions(newInstructions);
-
-    const newInstructionsResult = [...instructionResults];
-    newInstructionsResult.splice(index, 1);
-    setInstructionResults(newInstructionsResult);
-    console.log(newInstructionsResult);
+    setOverall("NP");
   };
 
   const handleInstructionsAndTest = async () => {
     // Verificar si la URL está vacía
+
     if (url === "") {
       setError2("Por favor ingrese la URL.");
       return;
@@ -129,8 +128,18 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     try {
       const response = await axios.post("/api/run-test", { instructions, url });
       const results = response.data.results;
+      const newStatus = [...instructions];
+      setOverall("NP");
+      for (let i = 0; i < instructions.length; i++) {
+        newStatus[i].status = results[i];
+        setInstructions(newStatus);
 
-      setInstructionResults(results);
+        if (newStatus[i].status === "Passed" && overall != "Failed") {
+          setOverall("Passed");
+        } else {
+          setOverall("Failed");
+        }
+      }
 
       alert("Prueba completada con éxito.");
     } catch (error) {
@@ -143,24 +152,39 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
   return (
     <div>
-      <div className="flex justify-end items-center py-5 mr-24">
-        <label htmlFor="urlInput" className="mr-5">
-          URL:
-        </label>
-        <input
-          type="text"
-          id="urlInput"
-          value={url}
-          onChange={handleUrlChange}
-          placeholder="Ingrese la URL"
-          className={
-            url === "" && error2 != "" ? "input-error" : "input" + " px-5"
-          }
-        />
-        {error2 && <p style={{ color: "red" }}>{error2}</p>}
+      <div>
+        <div className="flex justify-start items-center py-5 mr-24">
+          <label htmlFor="urlInput" className="mr-3">
+            URL:
+          </label>
+          <input
+            type="text"
+            id="urlInput"
+            value={url}
+            onChange={handleUrlChange}
+            placeholder="Ingrese la URL"
+            className={url === "" && error2 != "" ? "input-error" : "input"}
+          />
+        </div>
+        {error2 && (
+          <p className="absolute -mt-4 ml-16 " style={{ color: "red" }}>
+            {error2}
+          </p>
+        )}
       </div>
 
-      <h2 className="my-5">Instrucciones:</h2>
+      <div className="flex justify-between">
+        <h2 className="my-5">Instrucciones:</h2>
+        <div className="flex items-center mr-10">
+          <button className="py-2 px-4 rounded-md font-bold text-white border-none mr-5 bg-yellow-600 hover:bg-yellow-700">
+            Importar
+          </button>
+          <button className="py-2 px-4 rounded-md font-bold text-white border-none bg-orange-600 hover:bg-orange-700">
+            Exportar
+          </button>
+        </div>
+      </div>
+
       <div className="flex justify-center">
         <div className="bg-white rounded-md mx-10 w-full">
           <div className="flex mx-5 my-4">
@@ -275,32 +299,27 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                 </div>
                 <div className="mx-5 flex items-center">
                   <div
-                    className="px-2 text-center bg-green-500 rounded text-[#FFFFFF] w-20 items r"
+                    className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2"
                     style={{
                       display:
-                        instructionResults[index] === "Passed"
-                          ? "block"
-                          : "none",
+                        instruction.status === "Passed" ? "block" : "none",
                     }}
                   >
                     Pasado
                   </div>
                   <div
-                    className="px-2 text-center bg-red-500 rounded  text-[#FFFFFF] w-20"
+                    className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 py-2"
                     style={{
                       display:
-                        instructionResults[index] === "Failed"
-                          ? "block"
-                          : "none",
+                        instruction.status === "Failed" ? "block" : "none",
                     }}
                   >
                     Fallado
                   </div>
                   <div
-                    className="px-2 text-center bg-gray-500 rounded  text-[#FFFFFF] w-20"
+                    className="px-2 text-center bg-gray-500 rounded-md  text-[#FFFFFF] w-20 py-2"
                     style={{
-                      display:
-                        instructionResults[index] === "NP" ? "block" : "none",
+                      display: instruction.status === "NP" ? "block" : "none",
                     }}
                   >
                     NP
@@ -312,13 +331,53 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         </div>
       </div>
       <br />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <button onClick={addInstruction} className="button mx-5">
-        Agregar Instrucción
-      </button>
-      <button onClick={handleInstructionsAndTest} className="button-send mx-5">
-        Enviar Instrucciones
-      </button>
+      {error && (
+        <p className="absolute -mt-5 ml-10" style={{ color: "red" }}>
+          {error}
+        </p>
+      )}
+      <div className="flex w-full mt-4">
+        <div>
+          <button onClick={addInstruction} className="button mr-5">
+            Agregar Instrucción
+          </button>
+          <button
+            onClick={handleInstructionsAndTest}
+            className="button-send mx-5"
+          >
+            Enviar Instrucciones
+          </button>
+        </div>
+        <div className="flex justify-end w-8/12 items-center ">
+          <h3>Overall</h3>
+          <div className="ml-5 flex items-center mr-8">
+            <div
+              className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2"
+              style={{
+                display: overall === "Passed" ? "block" : "none",
+              }}
+            >
+              Pasado
+            </div>
+            <div
+              className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 py-2"
+              style={{
+                display: overall === "Failed" ? "block" : "none",
+              }}
+            >
+              Fallado
+            </div>
+            <div
+              className="px-2 text-center bg-gray-500 rounded-md  text-[#FFFFFF] w-20 py-2"
+              style={{
+                display: overall === "NP" ? "block" : "none",
+              }}
+            >
+              NP
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
