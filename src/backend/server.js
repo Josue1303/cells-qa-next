@@ -17,6 +17,25 @@ app.prepare().then(() => {
 
   server.use(express.json());
 
+  server.post("/api/run-test", async (req, res) => {
+    try {
+      console.log("Este es el body:", JSON.stringify(req.body, null, 2));
+
+      const driver = await setupWebDriver();
+      const results = await runTest(
+        driver,
+        req.body.instructions,
+        req.body.url
+      );
+      res.status(200).json({ results }); // Enviar resultados al cliente
+      console.log("Resultados enviados");
+      console.log(results);
+    } catch (error) {
+      console.error("Error al ejecutar la prueba:", error);
+      res.status(500).send("Error al ejecutar la prueba.");
+    }
+  });
+
   server.post("/api/runTestsCSV", upload.single("file"), async (req, res) => {
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
