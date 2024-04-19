@@ -352,7 +352,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
           <h3>Overall</h3>
           <div className="ml-5 flex items-center mr-8">
             <div
-              className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2"
+              className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2 mr-2"
               style={{
                 display: overall === "Passed" ? "block" : "none",
               }}
