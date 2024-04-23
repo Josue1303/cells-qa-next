@@ -6,7 +6,7 @@ import React from "react";
 const TestButton = ({ instructions, url }) => {
   const handleTestButtonClick = async () => {
     try {
-      await axios.post("/api/run-test", { instructions, url }); // Pasar tanto las instrucciones como la URL al backend
+      await axios.post("/api/tests/run-test", { instructions, url }); // Pasar tanto las instrucciones como la URL al backend
       alert("Prueba completada con éxito.");
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);

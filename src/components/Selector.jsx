@@ -126,7 +126,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
     // Envía las instrucciones y la URL al backend para ejecutar la automatización
     try {
-      const response = await axios.post("/api/run-test", { instructions, url });
+      const response = await axios.post("/api/tests/run-test", { instructions, url });
       const results = response.data.results;
       const newStatus = [...instructions];
       setOverall("NP");
