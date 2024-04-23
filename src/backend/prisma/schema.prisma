@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model directories {
+  directoryId       Int           @id @default(autoincrement())
+  userId            Int
+  directoryName     String
+  directoryRoute    String
+  directoryFather   Int?
+  directories       directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: NoAction, onUpdate: NoAction)
+  other_directories directories[] @relation("directoriesTodirectories")
+  users             users         @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  files             files[]
+}
+
+model files {
+  fileId      Int          @id @default(autoincrement())
+  userId      Int
+  directoryId Int?
+  fileName    String
+  fileType    String
+  fileHashed  String
+  fileSize    BigInt
+  fileRoute   String
+  directories directories? @relation(fields: [directoryId], references: [directoryId], onDelete: NoAction, onUpdate: NoAction, map: "directoryId")
+  users       users        @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model instructions {
+  instructionId     Int     @id @default(autoincrement())
+  testId            Int
+  action            String
+  sequence          Int
+  searchKey         String
+  searchBy          String
+  textInput         String
+  instructionStatus Boolean @default(false)
+  tests             tests   @relation(fields: [testId], references: [testId], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tests {
+  testId       Int            @id @default(autoincrement())
+  userId       Int
+  testStatus   Boolean
+  createdAt    DateTime       @db.Date
+  modifiedAt   DateTime       @db.Date
+  instructions instructions[]
+  users        users          @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  userId      Int    @id @default(autoincrement())
+  username    String
+  email       String @unique
+  password    String
+  directories directories[]
+  files       files[]
+  tests       tests[]
+}
