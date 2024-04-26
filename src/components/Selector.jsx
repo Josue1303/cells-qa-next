@@ -126,7 +126,10 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
     // Envía las instrucciones y la URL al backend para ejecutar la automatización
     try {
-      const response = await axios.post("/api/tests/run-test", { instructions, url });
+      const response = await axios.post("/api/tests/run-test", {
+        instructions,
+        url,
+      });
       const results = response.data.results;
       const newStatus = [...instructions];
       setOverall("NP");
@@ -174,13 +177,44 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
       </div>
 
       <div className="flex justify-between">
-        <h2 className="my-5">Instrucciones:</h2>
+        <h2 className="my-5">Instructions:</h2>
         <div className="flex items-center mr-10">
-          <button className="py-2 px-4 rounded-md font-bold text-white border-none mr-5 bg-yellow-600 hover:bg-yellow-700">
-            Importar
+          <button className="py-2 px-4 rounded-md font-bold border-none mr-5 bg-white hover:bg-slate-50 flex">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 17 17"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-2"
+            >
+              <path
+                d="M8.49959 10.4168L7.82195 11.0945L8.49959 11.7721L9.17723 11.0945L8.49959 10.4168ZM9.45792 1.79183C9.45792 1.26256 9.02888 0.833496 8.49959 0.833496C7.9703 0.833496 7.54125 1.26255 7.54125 1.79183H9.45792ZM3.03027 6.30281L7.82195 11.0945L9.17723 9.73919L4.38557 4.94752L3.03027 6.30281ZM9.17723 11.0945L13.9689 6.30281L12.6136 4.94752L7.82195 9.73919L9.17723 11.0945ZM9.45792 10.4168V1.79183H7.54125V10.4168H9.45792Z"
+                fill="#232360"
+              />
+              <path
+                d="M1.79199 12.3335V13.2918C1.79199 14.3504 2.65011 15.2085 3.70866 15.2085H13.292C14.3506 15.2085 15.2087 14.3504 15.2087 13.2918V12.3335"
+                stroke="#232360"
+                stroke-width="2"
+              />
+            </svg>
+            Import
           </button>
-          <button className="py-2 px-4 rounded-md font-bold text-white border-none bg-orange-600 hover:bg-orange-700">
-            Exportar
+          <button className="py-2 px-4 rounded-md font-bold bg-white hover:bg-slate-50  flex">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mr-2"
+            >
+              <path
+                d="M12 14V10H14V14C14 15.1046 13.1046 16 12 16H2C0.89543 16 0 15.1046 0 14V4C0 2.89543 0.89543 2 2 2H4V4H2V14H12ZM11.2857 5.5H9.71429C8.92857 5.5 7.35714 5.5 5 7.85714C5 4.71429 7.35714 2.35714 9.71429 2.35714H11.2857V0L16 3.92857L11.2857 7.85714V5.5Z"
+                fill="#232360"
+              />
+            </svg>
+            Export
           </button>
         </div>
       </div>
@@ -189,21 +223,24 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         <div className="bg-white rounded-md mx-10 w-full">
           <div className="flex mx-5 my-4">
             <h3>No.</h3>
-            <div className="flex w-full">
-              <h3 className="w-2/12 mx-4 bg-white">Acción</h3>
-              <h3 className="w-2/12 mx-10 bg-white">Búscar por</h3>
-              <h3 className="w-2/12 mx-6 bg-white">Clave de búsqueda</h3>
-              <h3 className="w-2/12 mx-10 bg-white">Valor</h3>
+            <div className="flex ml-5">
+              <h3 className="w-60   bg-white">Action</h3>
+              <h3 className="w-60 ml-2  bg-white">Search By</h3>
+              <h3 className="w-60 ml-2  bg-white">Search Key</h3>
+              <h3 className="w-60 ml-2  bg-white">Input</h3>
             </div>
-            <div>
-              <h3 className="mx-3">Status</h3>
+            <div className="flex ml-7">
+              <h3 className="w-24  bg-white">Status</h3>
+              <h3 className="w-24  bg-white">Delete</h3>
             </div>
           </div>
           {instructions.map((instruction, index) => (
             <div key={index} className="justify-between w-full my-5">
               <div className="flex justify-center">
                 <div className="flex items-center w-full">
-                  <h3 className="font-bold  mx-5">{index + 1}</h3>
+                  <h3 className="font-bold w-4 mx-5 ml-6">{index + 1}</h3>
+
+                  {/* Accion */}
                   <div className="px-3">
                     <select
                       value={instruction.action}
@@ -214,10 +251,18 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                           : "input"
                       }
                     >
-                      <option value="">Seleccione una acción</option>
-                      <option value="sendKeys">Llenar campo</option>
-                      <option value="click">Click</option>
-                      <option value="getText">Comparar texto</option>
+                      <option value="" className="font-medium">
+                        Select an action
+                      </option>
+                      <option value="sendKeys" className="font-medium">
+                        Fill field
+                      </option>
+                      <option value="click" className="font-medium">
+                        Click
+                      </option>
+                      <option value="getText" className="font-medium">
+                        Compare Text
+                      </option>
                     </select>
                   </div>
                   <div
@@ -237,10 +282,18 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                           : "input"
                       }
                     >
-                      <option value="">Seleccione una opción</option>
-                      <option value="css">css</option>
-                      <option value="id">id</option>
-                      <option value="name">name</option>
+                      <option value="" className="font-medium">
+                        Select an option
+                      </option>
+                      <option value="css" className="font-medium">
+                        css
+                      </option>
+                      <option value="id" className="font-medium">
+                        id
+                      </option>
+                      <option value="name" className="font-medium">
+                        name
+                      </option>
                     </select>
                   </div>
 
@@ -252,7 +305,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                   >
                     <input
                       type="text"
-                      placeholder="Ingrese la clave de búsqueda"
+                      placeholder="Enter search key"
                       value={instruction.searchKey}
                       onChange={(e) => handleSearchKeyChange(index, e)}
                       className={
@@ -276,7 +329,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                   >
                     <input
                       type="text"
-                      placeholder="Ingrese el valor a probar"
+                      placeholder="Enter input"
                       value={instruction.textInput}
                       onChange={(e) => handleTextChange(index, e)}
                       className={
@@ -290,32 +343,24 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                     />
                   </div>
                 </div>
-                <div className="flex items-center mr-5">
-                  <button
-                    onClick={() => removeInstruction(index)}
-                    className="button-delete"
-                  >
-                    Eliminar
-                  </button>
-                </div>
                 <div className="mx-5 flex items-center">
                   <div
-                    className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2"
+                    className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 h-10 py-2"
                     style={{
                       display:
                         instruction.status === "Passed" ? "block" : "none",
                     }}
                   >
-                    Pasado
+                    <i className="bi bi-check text-bold text-3xl relative bottom-1"></i>
                   </div>
                   <div
-                    className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 py-2"
+                    className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 h-10 py-2"
                     style={{
                       display:
                         instruction.status === "Failed" ? "block" : "none",
                     }}
                   >
-                    Fallado
+                    <i className="bi bi-x text-bold text-3xl relative bottom-1 stroke-2"></i>
                   </div>
                   <div
                     className="px-2 text-center bg-gray-500 rounded-md  text-[#FFFFFF] w-20 py-2"
@@ -325,6 +370,14 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                   >
                     NP
                   </div>
+                </div>
+                <div className="flex items-center mr-10">
+                  <button
+                    onClick={() => removeInstruction(index)}
+                    className=" w-20 text-gray-400 text-2xl first:hover:text-red-700"
+                  >
+                    <i className="bi bi-trash3-fill "></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -340,33 +393,33 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
       <div className="flex w-full mt-4">
         <div>
           <button onClick={addInstruction} className="button mr-5">
-            Agregar Instrucción
+            Add
           </button>
           <button
             onClick={handleInstructionsAndTest}
             className="button-send mx-5"
           >
-            Enviar Instrucciones
+            Send
           </button>
         </div>
         <div className="flex justify-end w-8/12 items-center ">
           <h3>Overall</h3>
           <div className="ml-5 flex items-center mr-10">
             <div
-              className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 py-2 mr-2"
+              className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 h-10 py-2 mr-2"
               style={{
                 display: overall === "Passed" ? "block" : "none",
               }}
             >
-              Pasado
+              <i className="bi bi-check text-bold text-3xl relative bottom-1"></i>
             </div>
             <div
-              className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 py-2"
+              className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 py-2 h-10"
               style={{
                 display: overall === "Failed" ? "block" : "none",
               }}
             >
-              Fallado
+              <i className="bi bi-x text-bold text-3xl relative bottom-1"></i>
             </div>
             <div
               className="px-2 text-center bg-gray-500 rounded-md  text-[#FFFFFF] w-20 py-2"
