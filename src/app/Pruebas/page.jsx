@@ -1,7 +1,6 @@
 //page.jsx
 "use client";
 import Selector from "@/components/Selector";
-import TestButton from "@/components/TestButton";
 import React, { useState } from "react";
 
 export default function Home() {
