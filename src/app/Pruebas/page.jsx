@@ -1,6 +1,7 @@
 //page.jsx
 "use client";
 import Selector from "@/components/Selector";
+import Sidebar from "@/components/Sidebar";
 import React, { useState } from "react";
 
 export default function Home() {
@@ -16,7 +17,8 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-20">
+    <main className="min-h-screen p-20 ml-20">
+      <Sidebar></Sidebar>
       <h1 className="">Test</h1>
       <Selector
         onInstructionsChange={handleInstructionsChange}
