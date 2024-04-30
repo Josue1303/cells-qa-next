@@ -2,8 +2,14 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import axios from "axios";
 
 export default function Home() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
   const toggleMostrarPassword = () => {
@@ -14,6 +20,33 @@ export default function Home() {
 
   const toggleMostrarPassword2 = () => {
     setMostrarPassword2(!mostrarPassword2);
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (password !== confirmPassword) {
+        console.error("Las contraseñas no coinciden");
+        return;
+      }
+      const userData = {
+        username,
+        email,
+        password,
+      };
+
+      // console.log(userData);
+
+      const response = await axios.post("api/users/register", userData);
+
+      if (response.data) {
+        console.log("Registro exitoso");
+        // manda a pantalla correcta
+      }
+    } catch (error) {
+      console.error("Error al registrar:", error);
+    }
   };
 
   return (
@@ -39,7 +72,7 @@ export default function Home() {
             <div className="w-full">
               <div className="flex justify-end">
                 <a href="/Login" className="p-0 -mb-5">
-                  <i class="bi bi-x text-[35px] "></i>
+                  <i className="bi bi-x text-[35px] "></i>
                 </a>
               </div>
               <div className="flex justify-center">
@@ -56,17 +89,20 @@ export default function Home() {
                 type="text"
                 placeholder="Username"
                 className="input !w-full mb-8 "
+                onChange={(e) => setUsername(e.target.value)}
               />
               <input
                 type="text"
                 placeholder="Email"
                 className="input !w-full mb-8"
+                onChange={(e) => setEmail(e.target.value)}
               />
               <div className="display relative flex justify-center items-center">
                 <input
                   type={`${mostrarPassword ? "text" : "password"}`}
                   placeholder="Password"
                   className="input !w-full mb-8"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <i
                   className={`absolute flex justify-end text-[25px] mb-7 ml-80 cursor-pointer ${
@@ -80,6 +116,7 @@ export default function Home() {
                   type={`${mostrarPassword2 ? "text" : "password"}`}
                   placeholder="Confirm password"
                   className="input !w-full mb-8"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <i
                   className={`absolute flex justify-end text-[25px] mb-7 ml-80 cursor-pointer ${
@@ -92,6 +129,7 @@ export default function Home() {
               <a
                 href="Register"
                 className="button !bg-[#24374B] !px-8 flex justify-center mb-3"
+                onClick={(e) => handleRegister(e)}
               >
                 Register
               </a>

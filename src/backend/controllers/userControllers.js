@@ -73,12 +73,13 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    console.log("Login successful for user:", user.userId);
-    res.json({ message: "Login successful", userId: user.userId });
+    // console.log("Login successful for user:", user.userId);
+    // res.json({ message: "Login successful", userId: user.userId });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ error: "Failed to login" });
   }
+  // console.log("Si funciona papu")
 };
 
 module.exports = {
