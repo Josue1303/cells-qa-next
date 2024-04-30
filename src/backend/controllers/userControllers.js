@@ -1,6 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { authenticateToken } = require("../services/jwt");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -16,9 +18,8 @@ const getAllUsers = async (req, res) => {
 const createUser = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    
     const existingUser = await prisma.users.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
@@ -33,7 +34,11 @@ const createUser = async (req, res) => {
         password: hashedPassword,
       },
     });
-    res.status(201).json(newUser);
+
+    const token = jwt.sign({ userId: newUser.userId }, "your_secret_key", {
+      expiresIn: "1h",
+    });
+    return res.json({ token, newUser });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Failed to create user" });
@@ -48,13 +53,22 @@ const login = async (req, res) => {
       where: { email },
     });
 
+    console.log(user)
+
     if (!user) {
       console.error("Login failed: User not found for email:", email);
       return res.status(404).json({ error: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    if (isMatch) {
+      const token = jwt.sign({ userId: user.userId }, "your_secret_key", {
+        expiresIn: "1h",
+      });
+
+      const userID = user.userId;
+      return res.json({ token, userID });
+    } else {
       console.error("Login failed: Invalid credentials for user:", email);
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -67,9 +81,8 @@ const login = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getAllUsers,
-  createUser, 
+  createUser,
   login,
 };

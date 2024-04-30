@@ -19,7 +19,9 @@ const Navbar = () => {
         <a href="/Login" className="button !bg-[#6CA6B2] !px-8 !mr-10">
           Login
         </a>
-        <div className="button !bg-[#24374B] !px-8">Register</div>
+        <a href="/Register" className="button !bg-[#24374B] !px-8">
+          Register
+        </a>
       </div>
     </nav>
   );
