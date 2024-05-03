@@ -1,7 +1,7 @@
 // components/Sidebar.js
 import Image from "next/image";
 
-const Sidebar = () => {
+const Sidebar = ({ page }) => {
   return (
     <div className="bg-white h-screen w-28 fixed left-0 top-0 overflow-y-auto">
       <div className="px-4 py-6">
@@ -11,7 +11,11 @@ const Sidebar = () => {
           <li className="px-2">
             <a
               href="/Pruebas"
-              className="flex justify-center flex-row items-center py-2 rounded-lg text-[#24374B] text-[20px]  mb-0"
+              className={`flex justify-center flex-row items-center py-2 rounded-lg   ${
+                page === "Dashboard"
+                  ? "text-white text-[20px]  bg-[#24374B]"
+                  : "text-[#24374B] text-[20px]"
+              }`}
             >
               <div className="text-center">
                 <i class="bi bi-grid"></i>
@@ -22,11 +26,30 @@ const Sidebar = () => {
           <li className="px-2">
             <a
               href="/Pruebas"
-              className="flex justify-center flex-row items-center py-2 rounded-lg text-white text-[20px]  bg-[#24374B]"
+              className={`flex justify-center flex-row items-center py-2 rounded-lg   ${
+                page === "Test"
+                  ? "text-white text-[20px]  bg-[#24374B]"
+                  : "text-[#24374B] text-[20px]"
+              }`}
             >
               <div className="text-center">
                 <i class="bi bi-send"></i>
-                <p className="text-[10px]">Pruebas</p>
+                <p className="text-[10px]">Test</p>
+              </div>
+            </a>
+          </li>
+          <li className="px-2">
+            <a
+              href="/Comparacion"
+              className={`flex justify-center flex-row items-center py-2 rounded-lg   ${
+                page === "Comparacion"
+                  ? "text-white text-[20px]  bg-[#24374B]"
+                  : "text-[#24374B] text-[20px]"
+              }`}
+            >
+              <div className="text-center">
+                <i class="bi bi-book"></i>
+                <p className="text-[10px]">Compare</p>
               </div>
             </a>
           </li>
