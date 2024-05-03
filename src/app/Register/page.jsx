@@ -23,7 +23,6 @@ export default function Home() {
   };
 
   const handleRegister = async (e) => {
-    e.preventDefault();
 
     try {
       if (password !== confirmPassword) {
@@ -127,7 +126,7 @@ export default function Home() {
               </div>
 
               <a
-                href="Register"
+                href="/Dashboard"
                 className="button !bg-[#24374B] !px-8 flex justify-center mb-3"
                 onClick={(e) => handleRegister(e)}
               >

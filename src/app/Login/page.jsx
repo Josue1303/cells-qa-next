@@ -15,8 +15,6 @@ export default function Home() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-
     try {
       const userData = {
         email,
@@ -64,7 +62,7 @@ export default function Home() {
             <div className="w-full">
               <input
                 type="text"
-                placeholder="Username or email"
+                placeholder="email"
                 className="input !w-full mb-8 "
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -85,7 +83,7 @@ export default function Home() {
               </div>
 
               <div className="button !bg-[#6CA6B2] !px-8 flex justify-center mb-3">
-                <a href="Login" onClick={(e) => handleLogin(e)}>
+                <a href="/Dashboard" onClick={(e) => handleLogin(e)}>
                   Login
                 </a>
               </div>
