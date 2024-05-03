@@ -126,7 +126,7 @@ export default function Home() {
               </div>
 
               <a
-                href="Register"
+                href="/Dashboard"
                 className="button !bg-[#24374B] !px-8 flex justify-center mb-3"
                 onClick={(e) => handleRegister(e)}
               >
