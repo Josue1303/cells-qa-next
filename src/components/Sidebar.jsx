@@ -15,7 +15,7 @@ const Sidebar = () => {
             >
               <div className="text-center">
                 <i class="bi bi-grid"></i>
-                <p className="text-[10px]">Menu</p>
+                <p className="text-[10px]">Dashboard</p>
               </div>
             </a>
           </li>

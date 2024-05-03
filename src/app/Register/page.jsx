@@ -1,8 +1,8 @@
 //page.jsx
 "use client";
+import axios from "axios";
 import Image from "next/image";
 import { useState } from "react";
-import axios from "axios";
 
 export default function Home() {
   const [username, setUsername] = useState("");
