@@ -8,15 +8,20 @@ datasource db {
 }
 
 model directories {
-  directoryId       Int           @id @default(autoincrement())
-  userId            Int
-  directoryName     String
-  directoryRoute    String
-  directoryFather   Int?
-  directories       directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: NoAction, onUpdate: NoAction)
+  directoryId   Int           @id @default(autoincrement())
+  userId        Int
+  directoryName String
+  directoryRoute String
+  directoryFather Int?
+  dateCreated   DateTime?     @map("datecreated")
+  lastModified  String?       @map("lastmodified")
+  versions      Int?
+  teamId        Int?
+  directories   directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: NoAction, onUpdate: NoAction)
   other_directories directories[] @relation("directoriesTodirectories")
-  users             users         @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
-  files             files[]
+  teams         teams?        @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction)
+  users         users         @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  files         files[]
 }
 
 model files {
@@ -28,8 +33,10 @@ model files {
   fileHashed  String
   fileSize    BigInt
   fileRoute   String
-  directories directories? @relation(fields: [directoryId], references: [directoryId], onDelete: NoAction, onUpdate: NoAction, map: "directoryId")
-  users       users        @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  teamId      Int?
+  directories directories? @relation(fields: [directoryId], references: [directoryId], onDelete: NoAction, onUpdate: NoAction)
+  teams       teams?       @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction)
+  users       users        @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model instructions {
@@ -41,17 +48,37 @@ model instructions {
   searchBy          String
   textInput         String
   instructionStatus Boolean @default(false)
-  tests             tests   @relation(fields: [testId], references: [testId], onDelete: NoAction, onUpdate: NoAction)
+  tests             tests   @relation(fields: [testId], references: [testId], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model teams {
+  teamId     Int      @id @default(autoincrement())
+  teamName   String
+  directories directories[]
+  files      files[]
+  tests      tests[]
+  user_teams user_teams[]
 }
 
 model tests {
   testId       Int            @id @default(autoincrement())
   userId       Int
   testStatus   Boolean
-  createdAt    DateTime       @db.Date
-  modifiedAt   DateTime       @db.Date
+  createdAt    DateTime
+  modifiedAt   DateTime
+  teamId       Int?
   instructions instructions[]
-  users        users          @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  teams        teams?         @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction)
+  users        users          @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user_teams {
+  userId  Int
+  teamId  Int
+  users   users @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  teams   teams @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([userId, teamId])
 }
 
 model users {
@@ -62,4 +89,5 @@ model users {
   directories directories[]
   files       files[]
   tests       tests[]
+  user_teams  user_teams[]
 }
