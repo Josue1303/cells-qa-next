@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-20 ml-20">
-      <Sidebar></Sidebar>
+      <Sidebar page="Test"></Sidebar>
       <h1 className="">Test</h1>
       <Selector
         onInstructionsChange={handleInstructionsChange}
