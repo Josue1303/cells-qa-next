@@ -18,7 +18,7 @@ export default function Home() {
 
   const handleLogin = async (e) => {
 
-    e.preventDefault();
+
 
     try {
       
@@ -67,7 +67,7 @@ export default function Home() {
             <div className="w-full">
               <input
                 type="text"
-                placeholder="Username or email"
+                placeholder="email"
                 className="input !w-full mb-8 "
 
                 onChange={(e) => 
@@ -92,7 +92,7 @@ export default function Home() {
 
               <div className="button !bg-[#6CA6B2] !px-8 flex justify-center mb-3">
               <a
-                href="Login"
+                href="/Dashboard"
                 onClick={(e) => handleLogin(e)}
               >
                 Login

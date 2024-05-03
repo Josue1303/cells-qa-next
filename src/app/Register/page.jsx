@@ -23,7 +23,6 @@ export default function Home() {
   };
 
   const handleRegister = async (e) => {
-    e.preventDefault();
 
     try {
       if (password !== confirmPassword) {
