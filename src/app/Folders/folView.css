@@ -69,12 +69,6 @@
   display: flex;
   justify-content: space-between;
 }
-.table-row h2,
-.table-row p {
-  font-size: 16px;
-  font-weight: normal;
-  color: #768396;
-}
 
 .table-l,
 .table-l-d,
@@ -109,7 +103,6 @@
 }
 
 .table-r-r {
-  justify-content: flex-end;
   gap: 10px;
 }
 

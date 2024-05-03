@@ -41,7 +41,7 @@ export default function Home() {
           <div className="search-container">
             <input
               type="text"
-              className="search"
+              className="input"
               id="searchInput"
               placeholder="Find a Project..."
               onInput={buscarFolders}
@@ -62,10 +62,10 @@ export default function Home() {
         <div id="folders"></div>
         <div class="table-row">
           <div class="table-l">
-            <h1>Identificador_cambios_python</h1>
+            <h1 className="text-[#24374B] ">Identificador_cambios_python</h1>
             <div class="table-l-d">
-              <h3>Create: 27/03/23</h3>
-              <h3>Modified: Last Week</h3>
+              <p>Create: 27/03/23</p>
+              <p>Modified: Last Week</p>
             </div>
           </div>
           <div class="table-r">
@@ -73,10 +73,9 @@ export default function Home() {
               <a class="button !bg-[#24374B]" href="/Pruebas">
                 Acceder
               </a>
-              <h2>Versions: 5</h2>
+              <p>Versions: 5</p>
             </div>
             <div class="table-r-r">
-              <p>Delete</p>
               <i className="bi bi-trash3-fill text-gray-400 text-2xl "></i>
             </div>
           </div>
