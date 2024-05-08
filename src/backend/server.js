@@ -10,6 +10,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 const userRoutes = require("./routes/userRoutes");
 const testRoutes = require("./routes/testRoutes");
+const teamsRoutes = require("./routes/teamsRoutes");
 const cors = require("cors");
 
 app.prepare().then(() => {
@@ -20,6 +21,7 @@ app.prepare().then(() => {
 
   server.use("/api/users", userRoutes);
   server.use("/api/tests", testRoutes);
+  server.use("/api/teams", teamsRoutes);
 
   server.all("*", (req, res) => {
     return handle(req, res);

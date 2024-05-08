@@ -54,6 +54,7 @@ model instructions {
 model teams {
   teamId     Int      @id @default(autoincrement())
   teamName   String
+  code       String
   directories directories[]
   files      files[]
   tests      tests[]
