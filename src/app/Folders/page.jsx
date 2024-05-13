@@ -54,8 +54,8 @@ export default function Home() {
               <i class="bi bi-search"></i>
             </span>
           </div>
-          <button className="new-folder" onClick={createFolder}>
-            <i class="bi bi-folder text-white"></i>
+          <button className="button !bg-green-500 !flex" onClick={createFolder}>
+            <i class="bi bi-folder text-white mr-2"></i>
             <p>New</p>
           </button>
         </div>
