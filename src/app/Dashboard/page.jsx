@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import Header from "@/components/TopBar";
 import axios from "axios";
 import Modal from './Modal'; 
+import Modal2 from './Modal2'; 
 
 export default function Home() {
   const [teams, setTeams] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Definición de fetchUserTeams dentro del componente Home para asegurar su alcance
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
+  
   const fetchUserTeams = async () => {
     try {
       const userId = 36;
@@ -39,8 +40,15 @@ export default function Home() {
       <Header />
 
       <div className="flex-grow p-10">
-        <h2 className="mb-12 ml-16">Menu</h2>
-
+        <div className="flex justify-between items-center">
+          <h2 className="mb-12 ml-16">Menu</h2>
+          <button onClick={() => setIsModalOpen2(true)} className="flex mr-28 text-white py-2 px-2 rounded" style={{ backgroundColor: '#34D870' }}>
+          <img  className="flex mr-2" src="/img/addIcon.svg" />
+          <p className="pt-0.5 font-bold	" style={{fontSize: 14}}>Join Team</p>
+          </button>
+        </div>
+        
+        
         <div className="relative flex items-center mb-4">
           {startIndex > 0 && (
             <button className="absolute left-0" onClick={handlePrev}><i className="bi bi-caret-left-fill"></i></button>
@@ -74,6 +82,7 @@ export default function Home() {
       </div>
 
       {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} refreshTeams={fetchUserTeams} />}
+      {isModalOpen2 && <Modal2 onClose={() => setIsModalOpen2(false)} refreshTeams={fetchUserTeams} />}
     </main>
   );
 }

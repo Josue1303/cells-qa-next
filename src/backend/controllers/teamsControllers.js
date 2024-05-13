@@ -100,7 +100,91 @@ const createTeam = async (req, res) => {
   }
 };
 
+const deleteTeamMember = async (req, res) => {
+  const { userId, teamId } = req.params; // Suponemos que ambos parámetros se pasan en la URL
+
+  try {
+    // Busca el registro en la tabla user_teams
+    const userTeam = await prisma.user_teams.findUnique({
+      where: {
+        userId_teamId: {
+          userId: parseInt(userId),
+          teamId: parseInt(teamId)
+        }
+      }
+    });
+
+    if (!userTeam) {
+      return res.status(404).json({ error: 'Relación usuario-equipo no encontrada' });
+    }
+
+    // Elimina el registro encontrado
+    await prisma.user_teams.delete({
+      where: {
+        userId_teamId: {
+          userId: parseInt(userId),
+          teamId: parseInt(teamId)
+        }
+      }
+    });
+
+    res.status(200).json({ message: 'Miembro del equipo eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar miembro del equipo:', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+};
+
+const addTeam = async (req, res) =>  {
+  const { code, userId } = req.body;
+
+  if (!code || !userId) {
+    return res.status(400).json({ error: 'Código y ID de usuario son requeridos' });
+  }
+
+  try {
+    const team = await prisma.teams.findFirst({
+      where: {
+        code: code
+      },
+    });
+
+    if (!team) {
+      return res.status(404).json({ error: 'No existe ese código de equipo' });
+    }
+
+    const existingUserTeam = await prisma.user_teams.findUnique({
+      where: {
+        userId_teamId: {
+          userId: parseInt(userId),
+          teamId: team.teamId
+        }
+      }
+    });
+
+    if (existingUserTeam) {
+      return res.status(409).json({ error: 'El usuario ya es miembro de este equipo' });
+    }
+
+    const newUserTeam = await prisma.user_teams.create({
+      data: {
+        userId: parseInt(userId),
+        teamId: team.teamId
+      }
+    });
+
+    res.status(201).json({ userTeam: newUserTeam });
+  }
+  catch (error) {
+    console.error('Error al agregar miembro', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+};
+
+
 module.exports = {
   getUserTeams,
-  createTeam
+  createTeam,
+  deleteTeamMember, 
+  addTeam
 };
