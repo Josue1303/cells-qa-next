@@ -3,6 +3,7 @@
 import "../Folders/folView.css";
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import Modal from './Modal'; 
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -12,35 +13,32 @@ function formatDate(dateString) {
 
 export default function Home() {
   const [directories, setDirectories] = useState([]);
+  const [filteredDirectories, setFilteredDirectories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedDirectoryId, setSelectedDirectoryId] = useState(null);
+  const [isModalOpen2, setIsModalOpen2] = useState(false);
 
-    useEffect(() => {
-        
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:3005/api/projects/dfather/1');
-                setDirectories(response.data); 
-            } catch (error) {
-                setError(error.message);
-                console.error("Error fetching data: ", error);
-            }
-        };
-
-        fetchData();
+  const fetchData = async () => {
+      try {
+          const response = await axios.get('http://localhost:3005/api/projects/dfather/1');
+          setDirectories(response.data); 
+          setFilteredDirectories(response.data);  
+      } catch (error) {
+          setError(error.message);
+          console.error("Error fetching data: ", error);
+      }
+  };
+  useEffect(() => {
+    fetchData();
   }, []);
+
   const buscarFolders = () => {
     " ";
   };
   {
     // Implementa la función buscarFolders según tu lógica
-  }
-  const createFolder = () => {
-    " ";
-  };
-  {
-    // Implementa la función createFolder según tu lógica
   }
   const handleDelete = async () => {
     try {
@@ -54,21 +52,6 @@ export default function Home() {
     }
   };
   
-  {
-    // Implementa la función delFolder según tu lógica
-  }
-  const goTo = () => {
-    " ";
-  };
-  {
-    // Implementa la función goTo según tu lógica
-  }
-  const uploadFile = () => {
-    " ";
-  };
-  {
-    // Implementa la función uploadFile según tu lógica
-  }
   const openModal = (directoryId) => {
     console.log("Opening modal for directory ID:", directoryId);  // Debug: Check what you are actually getting here
     setSelectedDirectoryId(directoryId);
@@ -77,6 +60,17 @@ export default function Home() {
 
   const closeModal = () => {
     setModalIsOpen(false);
+  };
+
+  useEffect(() => {
+    const filtered = directories.filter(directory => 
+      directory.directoryName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredDirectories(filtered);
+  }, [searchTerm, directories]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
   
   
@@ -92,23 +86,22 @@ export default function Home() {
               className="input"
               id="searchInput"
               placeholder="Find a Project..."
-              onInput={buscarFolders}
+              onInput={handleSearchChange}
             />
             <span
               className="icon"
-              onClick={buscarFolders}
+              
               style={{ cursor: "pointer" }}
             >
               <i class="bi bi-search"></i>
             </span>
           </div>
-          <button className="new-folder" onClick={createFolder}>
+          <button className="new-folder" onClick={() => setIsModalOpen2(true)}>
             <i class="bi bi-folder text-white"></i>
             <p>New</p>
           </button>
         </div>
-        {directories.map((directory, index) => (
-          
+        {filteredDirectories.map((directory, index) => (         
           <React.Fragment key={index}>
               <div id={`folder-${index}`}>
                   
@@ -118,7 +111,7 @@ export default function Home() {
                       <h1 className="text-[#24374B]">{directory.directoryName}</h1>
                       <div className="table-l-d">
                           <p>Create: {formatDate(directory.dateCreated)}</p>
-                          <p>Modified: </p> 
+                          <p>Modified: {directory.lastModified} </p> 
                       </div>
                   </div>
                   <div className="table-r">
@@ -145,6 +138,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      {isModalOpen2 && <Modal onClose={() => setIsModalOpen2(false)} refreshDirectories={fetchData} />}
     </main>
   );
 }
