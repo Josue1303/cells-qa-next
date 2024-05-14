@@ -15,7 +15,8 @@ model directories {
   dateCreated       DateTime?     @map("datecreated") @db.Date
   lastModified      String?       @map("lastmodified") @db.VarChar(15)
   versions          Int?
-  teamId            Int?
+  teamId            Int
+  descripcion       String?
   directories       directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: Cascade, onUpdate: NoAction, map: "directories_dfather_fkey")
   other_directories directories[] @relation("directoriesTodirectories")
   teams             teams?        @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction, map: "directories_teamid_fkey")

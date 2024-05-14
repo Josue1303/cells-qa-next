@@ -46,9 +46,51 @@ const deleteDirectory = async (req, res) => {
   }
 };
 
-  
+const addDirectory = async (req, res) => {
+  const { directoryName, teamId, descripcion} = req.body;
+  const currentDate = new Date().toLocaleString('en-US', {
+    timeZone: 'America/Belize',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  const [month, day, year] = currentDate.split('/');
+  const dateInLocalTimezone = new Date(`${year}-${month}-${day}T00:00:00-06:00`);
+  const currentDate2 = new Date().toLocaleDateString('en-CA');
+  try{
+    const existingDirectory = await prisma.directories.findFirst({
+      where: {
+        directoryName: directoryName,
+        teamId: parseInt(teamId)
+      }
+    });
+
+    if (existingDirectory) {
+      return res.status(409).json({ error: 'Ya existe un directorio con ese nombre.' });
+    }
+    const newDirectory = await prisma.directories.create({
+      data: {
+        directoryName,
+        teams: { 
+          connect: { teamId: parseInt(teamId) }
+        },
+        versions:1,
+        directoryRoute: "/",
+        dateCreated: dateInLocalTimezone,
+        lastModified: currentDate2,
+        descripcion: descripcion
+      }
+    });
+    res.status(201).json({ directory: newDirectory});
+  }
+  catch (error) {
+    console.error('Error al crear directorio', error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+};
 
 module.exports = {
     getFatherDirectories,
-    deleteDirectory
+    deleteDirectory,
+    addDirectory
 };
