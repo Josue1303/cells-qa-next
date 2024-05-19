@@ -25,6 +25,7 @@ const getUserTeams = async (req, res) => {
     // Extraer los equipos del usuario, incluyendo solo el nombre del equipo y el código
     const teams = user.user_teams.map(userTeam => {
       return {
+        teamId: userTeam.teams.teamId,
         teamName: userTeam.teams.teamName,
         code: userTeam.teams.code // Asegúrate de que se incluye el código del equipo
       };
@@ -127,6 +128,21 @@ const deleteTeamMember = async (req, res) => {
         }
       }
     });
+
+    const remainingMembers = await prisma.user_teams.findMany({
+      where: {
+        teamId: parseInt(teamId)
+      }
+    });
+    if (remainingMembers.length === 0) {
+      
+      await prisma.teams.delete({
+        where: {
+          teamId: parseInt(teamId)
+        }
+      });
+      return res.status(200).json({ message: 'Miembro del equipo eliminado y equipo borrado correctamente' });
+    }
 
     res.status(200).json({ message: 'Miembro del equipo eliminado correctamente' });
   } catch (error) {

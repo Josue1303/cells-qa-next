@@ -7,7 +7,7 @@ import Modal from './Modal';
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  const options = { timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric' };
+  const options = { timeZone: 'UTC' , year: 'numeric', month: 'numeric', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 }
 
@@ -19,6 +19,7 @@ export default function Home() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedDirectoryId, setSelectedDirectoryId] = useState(null);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
+  
 
   const fetchData = async () => {
       try {
@@ -34,12 +35,7 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const buscarFolders = () => {
-    " ";
-  };
-  {
-    // Implementa la función buscarFolders según tu lógica
-  }
+  
   const handleDelete = async () => {
     try {
       console.log("Deleting directory ID:", selectedDirectoryId); // Debug: Ensure this is the correct ID
@@ -96,8 +92,8 @@ export default function Home() {
               <i class="bi bi-search"></i>
             </span>
           </div>
-          <button className="button !bg-green-500 !flex" onClick={createFolder}>
-            <i class="bi bi-folder text-white mr-2"></i>
+          <button className="new-folder" onClick={() => setIsModalOpen2(true)}>
+            <i className="bi bi-folder text-white"></i>
             <p>New</p>
           </button>
         </div>
