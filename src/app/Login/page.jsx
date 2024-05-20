@@ -1,6 +1,5 @@
 //page.jsx
 "use client";
-import axios from "axios";
 import Image from "next/image";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -33,7 +32,7 @@ export default function Home() {
       } else {
         setError(error);
         console.log(error);
-        toast("Credenciales incorrectas", { type: error });
+        alert("Credenciales incorrectas", { type: error });
       }
     });
   });

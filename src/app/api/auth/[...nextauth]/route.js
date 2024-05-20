@@ -2,7 +2,7 @@ import NextAuth from "next-auth/next";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import db from "@/libs/db";
-// require('dotenv').config()
+
 
 
 const authOptions = {

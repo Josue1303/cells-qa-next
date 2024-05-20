@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function Home() {
-
   const [alert, setAlert] = useState("");
   const router = useRouter();
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -29,7 +29,7 @@ export default function Home() {
   const onSubmit = handleSubmit(async (data) => {
     console.log(data);
     if (data.password !== data.confirmPassword) {
-      console.log("Las contraseñas no coinciden");
+      setAlert("Las contraseñas no coinciden");
     }
     const res = await fetch("/api/users/register", {
       method: "POST",
@@ -42,14 +42,23 @@ export default function Home() {
         "Content-Type": "application/json",
       },
     });
-    
-
 
     if (res.ok) {
       console.log("Registro exitoso");
-      router.push("/Dashboard");
-
-      // manda a pantalla correcta
+      const user = await res.json();
+      const signInRes = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
+      if (signInRes.ok) {
+        router.push("/Dashboard");
+      } else {
+        setAlert("Credenciales incorrectas");
+      }
+    } else {
+      const error = await res.json();
+      setAlert(error.error);
     }
   });
 
