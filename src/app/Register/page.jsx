@@ -1,16 +1,21 @@
 //page.jsx
 "use client";
-import axios from "axios";
+
 import Image from "next/image";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [alert, setAlert] = useState("");
+  const router = useRouter();
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const toggleMostrarPassword = () => {
     setMostrarPassword(!mostrarPassword);
@@ -21,32 +26,32 @@ export default function Home() {
   const toggleMostrarPassword2 = () => {
     setMostrarPassword2(!mostrarPassword2);
   };
-
-  const handleRegister = async (e) => {
-
-    try {
-      if (password !== confirmPassword) {
-        console.error("Las contraseñas no coinciden");
-        return;
-      }
-      const userData = {
-        username,
-        email,
-        password,
-      };
-
-      // console.log(userData);
-
-      const response = await axios.post("api/users/register", userData);
-
-      if (response.data) {
-        console.log("Registro exitoso");
-        // manda a pantalla correcta
-      }
-    } catch (error) {
-      console.error("Error al registrar:", error);
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+    if (data.password !== data.confirmPassword) {
+      console.log("Las contraseñas no coinciden");
     }
-  };
+    const res = await fetch("/api/users/register", {
+      method: "POST",
+      body: JSON.stringify({
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+
+
+    if (res.ok) {
+      console.log("Registro exitoso");
+      router.push("/Dashboard");
+
+      // manda a pantalla correcta
+    }
+  });
 
   return (
     <main className="min-h-screen p-20">
@@ -67,7 +72,10 @@ export default function Home() {
             />
           </svg>
 
-          <div className="bg-white w-full inline-flex items-center justify-center p-10 h-10/12 rounded-md shadow-md">
+          <form
+            className="bg-white w-full inline-flex items-center justify-center p-10 h-10/12 rounded-md shadow-md"
+            onSubmit={onSubmit}
+          >
             <div className="w-full">
               <div className="flex justify-end">
                 <a href="/Login" className="p-0 -mb-5">
@@ -87,22 +95,46 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Username"
+                {...register("username", {
+                  required: { value: true, message: "Username is required" },
+                })}
                 className="input !w-full mb-8 "
-                onChange={(e) => setUsername(e.target.value)}
+                // onChange={(e) => setUsername(e.target.value)}
               />
+              {errors.username && (
+                <span className="text-red-500 text-sm">
+                  {errors.username.message}
+                </span>
+              )}
               <input
-                type="text"
+                type="email"
                 placeholder="Email"
+                {...register("email", {
+                  required: { value: true, message: "Email is required" },
+                })}
                 className="input !w-full mb-8"
-                onChange={(e) => setEmail(e.target.value)}
+                // onChange={(e) => setEmail(e.target.value)}
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">
+                  {errors.email.message}
+                </span>
+              )}
               <div className="display relative flex justify-center items-center">
                 <input
                   type={`${mostrarPassword ? "text" : "password"}`}
                   placeholder="Password"
+                  {...register("password", {
+                    required: { value: true, message: "Password is required" },
+                  })}
                   className="input !w-full mb-8"
-                  onChange={(e) => setPassword(e.target.value)}
+                  // onChange={(e) => setPassword(e.target.value)}
                 />
+                {errors.password && (
+                  <span className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </span>
+                )}
                 <i
                   className={`absolute flex justify-end text-[25px] mb-7 ml-80 cursor-pointer ${
                     mostrarPassword ? "bi bi-eye-slash" : "bi bi-eye"
@@ -114,9 +146,20 @@ export default function Home() {
                 <input
                   type={`${mostrarPassword2 ? "text" : "password"}`}
                   placeholder="Confirm password"
+                  {...register("confirmPassword", {
+                    required: {
+                      value: true,
+                      message: "Confirm password is required",
+                    },
+                  })}
                   className="input !w-full mb-8"
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  // onChange={(e) => setConfirmPassword(e.target.value)}
                 />
+                {errors.confirmPassword && (
+                  <span className="text-red-500 text-sm">
+                    {errors.confirmPassword.message}
+                  </span>
+                )}
                 <i
                   className={`absolute flex justify-end text-[25px] mb-7 ml-80 cursor-pointer ${
                     mostrarPassword2 ? "bi bi-eye-slash" : "bi bi-eye"
@@ -125,15 +168,15 @@ export default function Home() {
                 ></i>
               </div>
 
-              <a
-                href="/Dashboard"
+              <button
+                type="submit"
                 className="button !bg-[#24374B] !px-8 flex justify-center mb-3"
-                onClick={(e) => handleRegister(e)}
               >
                 Register
-              </a>
+              </button>
+              {alert && <div className="alert">{alert}</div>}
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </main>

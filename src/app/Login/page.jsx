@@ -3,37 +3,40 @@
 import axios from "axios";
 import Image from "next/image";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [error, setError] = useState(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const toggleMostrarPassword = () => {
     setMostrarPassword(!mostrarPassword);
   };
-
-  const handleLogin = async (e) => {
-    try {
-      const userData = {
-        email,
-        password,
-      };
-
-      console.log(userData);
-
-      const response = await axios.post("api/users/login", userData);
-
-      if (response.data) {
-        console.log("Login exitoso");
-
-        router.push("/Test");
+  const router = useRouter();
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    }).then(({ ok, error }) => {
+      if (ok) {
+        router.push("/Dashboard");
+      } else {
+        setError(error);
+        console.log(error);
+        toast("Credenciales incorrectas", { type: error });
       }
-    } catch (error) {
-      console.error("Error al ingresar:");
-    }
-  };
+    });
+  });
   return (
     <main className="min-h-screen p-20">
       <div className="flex justify-center">
@@ -59,21 +62,42 @@ export default function Home() {
           </svg>
 
           <div className="bg-white w-full inline-flex items-center justify-center p-10 h-10/12 rounded-md shadow-md">
-            <div className="w-full">
+            <form className="w-full" onSubmit={onSubmit}>
+              {error && (
+                <div className="bg-red-500 text-white p-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
               <input
-                type="text"
-                placeholder="email"
+                type="email"
+                placeholder="Email"
                 className="input !w-full mb-8 "
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email", {
+                  required: true,
+                  message: "Email requerido",
+                })}
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">
+                  {errors.email.message}
+                </span>
+              )}
 
               <div className="display relative flex justify-center items-center">
                 <input
                   type={`${mostrarPassword ? "text" : "password"}`}
                   placeholder="Password"
                   className="input !w-full mb-8"
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password", {
+                    required: true,
+                    message: "Password requerido",
+                  })}
                 />
+                {errors.password && (
+                  <span className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </span>
+                )}
                 <i
                   className={`absolute flex justify-end text-[25px] mb-7 ml-80 cursor-pointer ${
                     mostrarPassword ? "bi bi-eye-slash" : "bi bi-eye"
@@ -82,11 +106,10 @@ export default function Home() {
                 ></i>
               </div>
 
-              <div className="button !bg-[#6CA6B2] !px-8 flex justify-center mb-3">
-                <a href="/Dashboard" onClick={(e) => handleLogin(e)}>
-                  Login
-                </a>
-              </div>
+              <button className="button !bg-[#6CA6B2] !px-8 flex justify-center mb-3 w-full">
+                Login
+              </button>
+
               <div className="flex items-center mb-3">
                 <hr className="border-solid border-[#232360] w-1/2" />
                 <h3 className="p-2">OR</h3>
@@ -99,7 +122,7 @@ export default function Home() {
               >
                 Register
               </a>
-            </div>
+            </form>
           </div>
         </div>
       </div>

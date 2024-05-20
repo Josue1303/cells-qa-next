@@ -83,7 +83,7 @@ model user_teams {
 
 model users {
   userId     Int          @id @default(autoincrement())
-  username   String
+  username   String       @unique(map: "username_unique")
   email      String       @unique(map: "email_unique")
   password   String
   tests      tests[]
