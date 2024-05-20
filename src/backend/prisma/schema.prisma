@@ -31,9 +31,11 @@ model files {
   fileName    String
   fileType    String
   fileHashed  String
-  fileSize    BigInt
+  fileSize    Int
   fileRoute   String
   teamId      Int?
+  dateCreated       DateTime @map("datecreated") @db.Date
+  descripcion       String?
   directories directories? @relation(fields: [directoryId], references: [directoryId], onDelete: Cascade, onUpdate: NoAction, map: "files_directoryid_fkey")
   teams       teams?       @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction, map: "files_teamid_fkey")
 }

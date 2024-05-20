@@ -12,6 +12,7 @@ const userRoutes = require("./routes/userRoutes");
 const testRoutes = require("./routes/testRoutes");
 const teamsRoutes = require("./routes/teamsRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const filesRoutes = require("./routes/filesRoutes");
 const cors = require("cors");
 
 app.prepare().then(() => {
@@ -24,6 +25,7 @@ app.prepare().then(() => {
   server.use("/api/tests", testRoutes);
   server.use("/api/teams", teamsRoutes);
   server.use("/api/projects", projectRoutes);
+  server.use("/api/files", filesRoutes);
   server.all("*", (req, res) => {
     return handle(req, res);
   });
