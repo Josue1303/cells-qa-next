@@ -3,8 +3,6 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import db from "@/libs/db";
 
-
-
 const authOptions = {
   providers: [
     Credentials({
@@ -40,6 +38,26 @@ const authOptions = {
     signIn: "/Login",
   },
   secret: process.env.SECRET,
+  // jwt: {
+  //   secret: process.env.JWT_SECRET,
+  //   encryption: true,
+  // },
+  // callbacks: {
+  //   async jwt({ token, user }) {
+  //     if (user) {
+  //       token.id = user.id;
+  //       token.email = user.email;
+  //       token.username = user.username;
+  //     }
+  //     return token;
+  //   },
+  //   async session({ session, token }) {
+  //     session.user.id = token.id;
+  //     session.user.email = token.email;
+  //     session.user.username = token.username;
+  //     return session;
+  //   },
+  // },
 };
 const handler = NextAuth(authOptions);
 

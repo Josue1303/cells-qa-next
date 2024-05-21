@@ -15,8 +15,11 @@ const projectRoutes = require("./routes/projectRoutes");
 const filesRoutes = require("./routes/filesRoutes");
 const cors = require("cors");
 
+
 app.prepare().then(() => {
   const server = express();
+
+  
 
   server.use(express.json());
   server.use(cors());
