@@ -1,7 +1,5 @@
-//components/Selector.jsx
-"use client";
-import axios from "axios";
 import React, { useState } from "react";
+import axios from "axios";
 
 const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [instructions, setInstructions] = useState([
@@ -11,6 +9,8 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
   const [overall, setOverall] = useState("NP");
+  const [showModal, setShowModal] = useState(false);
+  const [suggestedFallback, setSuggestedFallback] = useState(null);
 
   const addInstruction = () => {
     setInstructions([
@@ -80,9 +80,29 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     setOverall("NP");
   };
 
-  const handleInstructionsAndTest = async () => {
+  const handleFallbackConfirmation = async (confirm) => {
+    if (confirm) {
+      // Proceder con el selector fallback sugerido
+      const updatedInstructions = instructions.map((instruction, index) => {
+        if (index === suggestedFallback.instructionIndex) {
+          return {
+            ...instruction,
+            searchBy: suggestedFallback.fallback.searchBy,
+            searchKey: suggestedFallback.fallback.searchKey,
+          };
+        }
+        return instruction;
+      });
+      setInstructions(updatedInstructions);
+    } else {
+      // Regresar y permitir al usuario modificar el selector
+      // No se realiza ninguna acción adicional
+    }
+    setShowModal(false);
+    setSuggestedFallback(null);
+  };
+const handleInstructionsAndTest = async () => {
     // Verificar si la URL está vacía
-
     if (url === "") {
       setError2("Por favor ingrese la URL.");
       return;
@@ -126,35 +146,38 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
     // Envía las instrucciones y la URL al backend para ejecutar la automatización
     try {
-      const response = await axios.post("/api/tests/run-test", {
-        instructions,
-        url,
-      });
-      const results = response.data.results;
-      const newStatus = [...instructions];
-      setOverall("NP");
-      for (let i = 0; i < instructions.length; i++) {
-        newStatus[i].status = results[i];
-        setInstructions(newStatus);
+        const response = await axios.post("/api/tests/run-test", {
+            instructions,
+            url,
+        });
+        const results = response.data.results;
+        const newInstructions = [...instructions];
 
-        if (newStatus[i].status === "Passed" && overall != "Failed") {
-          setOverall("Passed");
-        } else {
-          setOverall("Failed");
-        }
-      }
+        results.forEach((result, index) => {
+            if (result.status === 'Fallback') {
+                setSuggestedFallback({
+                    instructionIndex: index,
+                    fallback: result.fallback,
+                });
+                setShowModal(true);
+                newInstructions[index].status = 'Failed';
+            } else {
+                newInstructions[index].status = result.status;
+            }
+        });
 
-      alert("Prueba completada con éxito.");
+        setInstructions(newInstructions);
     } catch (error) {
-      console.error("Error al ejecutar la prueba:", error);
-      alert("Error al ejecutar la prueba.");
+        console.error("Error al ejecutar la prueba:", error);
+        alert("Error al ejecutar la prueba.");
     }
     // Llama a la función de cambio de instrucciones para mantener la sincronización de datos
     onInstructionsChange(instructions);
   };
 
   return (
-    <div>
+
+      <div>
       <div>
         <div className="flex justify-start items-center py-5 mr-24">
           <label htmlFor="urlInput" className="mr-3">
@@ -432,6 +455,32 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded shadow">
+            <p>
+              No se pudo encontrar un componente con el selector proporcionado. El match más parecido es:
+            </p>
+            <pre>{JSON.stringify(suggestedFallback.fallback, null, 2)}</pre>
+            <p>¿Deseas continuar con este selector?</p>
+            <div className="mt-4">
+              <button
+                className="px-4 py-2 bg-green-500 text-white rounded mr-4"
+                onClick={() => handleFallbackConfirmation(true)}
+              >
+                Aceptar
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded"
+                onClick={() => handleFallbackConfirmation(false)}
+              >
+                Regresar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

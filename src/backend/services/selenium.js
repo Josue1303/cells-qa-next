@@ -44,40 +44,44 @@ async function findElementWithFallbacks(driver, searchBy, searchKey) {
         try {
             let element = await driver.findElement(By[selector.by](selector.value));
             console.log(`Found element with selector: ${selector.by} = ${selector.value}`);
-            return element;
+            return { element, fallback: null };
         } catch (error) {
             console.log(`Failed with selector: ${selector.by} = ${selector.value}`);
         }
     }
 
+    // Fallback logic
+    let closestFallback = null;
     const elements = await driver.findElements(By.css('*'));
+    let minDistance = Infinity;
+
     for (const element of elements) {
         const id = await element.getAttribute('id');
         const className = await element.getAttribute('class');
         const name = await element.getAttribute('name');
         let text = await element.getText();
-        
+
         // Normalize text by removing extra whitespace
         text = text.replace(/\s+/g, ' ').trim();
 
-        // Substring matching
-        if (id && id.includes(searchKey) || className && className.includes(searchKey) || name && name.includes(searchKey) || text && text.includes(searchKey)) {
-            console.log(`Found element with substring matching: ${searchKey}`);
-            return element;
-        }
+        // Calculate Levenshtein distance for better matching
+        const distances = [
+            levenshtein.get(searchKey, id || ''),
+            levenshtein.get(searchKey, className || ''),
+            levenshtein.get(searchKey, name || ''),
+            levenshtein.get(searchKey, text || '')
+        ];
 
-        // Regular expression matching
-        const regex = new RegExp(searchKey, 'i');
-        if (id && regex.test(id) || className && regex.test(className) || name && regex.test(name) || text && regex.test(text)) {
-            console.log(`Found element with regular expression matching: ${searchKey}`);
-            return element;
-        }
+        const minLocalDistance = Math.min(...distances);
 
-        // Levenshtein distance
-        if (id && levenshtein.get(searchKey, id) <= 5 || className && levenshtein.get(searchKey, className) <= 5 || name && levenshtein.get(searchKey, name) <= 5 || text && levenshtein.get(searchKey, text) <= 5) {
-            console.log(`Found element with Levenshtein distance: ${searchKey}`);
-            return element;
+        if (minLocalDistance < minDistance) {
+            minDistance = minLocalDistance;
+            closestFallback = { id, className, name, text };
         }
+    }
+
+    if (closestFallback && minDistance <= 5) {  // Assuming 5 as a threshold for closeness
+        return { element: null, fallback: closestFallback };
     }
 
     throw new Error(`Element not found using any method: ${searchKey}`);
@@ -85,34 +89,44 @@ async function findElementWithFallbacks(driver, searchBy, searchKey) {
 
 async function runTest(driver, instructions, url) {
     await driver.get(url);
-    
     const results = [];
-    
+
     for (const instruction of instructions) {
         const { action, searchBy, searchKey, textInput } = instruction;
-
         try {
-            const element = await findElementWithFallbacks(driver, searchBy, searchKey);
-            if (action === 'sendKeys') {
-                await element.sendKeys(textInput);
-                results.push('Passed');
-            } else if (action === 'click') {
-                await element.click();
-                results.push('Passed');
-            } else if (action === 'getText') {
-                const text = await element.getText();
-                if (text.trim() === textInput.trim()) {
-                    results.push('Passed');
-                } else {
-                    results.push('Failed');
-                }
+            const { element, fallback } = await findElementWithFallbacks(driver, searchBy, searchKey);
+            if (fallback) {
+                results.push({ status: 'Fallback', fallback: fallback });
+                continue;
+            }
+
+            switch (action) {
+                case 'sendKeys':
+                    await element.sendKeys(textInput);
+                    results.push({ status: 'Passed' });
+                    break;
+                case 'click':
+                    await element.click();
+                    results.push({ status: 'Passed' });
+                    break;
+                case 'getText':
+                    const text = await element.getText();
+                    if (text.trim() === textInput.trim()) {
+                        results.push({ status: 'Passed' });
+                    } else {
+                        results.push({ status: 'Failed' });
+                    }
+                    break;
+                default:
+                    results.push({ status: 'Undefined Action' });
+                    break;
             }
         } catch (error) {
             console.error(`Error performing action: ${action}`, error);
-            results.push('Failed');
+            results.push({ status: 'Error', error: error.toString() });
         }
     }
-    
+
     return results;
 }
 
