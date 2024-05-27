@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "DM Sans";
-  src: url("/public/fonts/DMSans.ttf") format("truetype");
+  src: url("/fonts/DMSans.ttf") format("truetype");
 }
 
 *,
