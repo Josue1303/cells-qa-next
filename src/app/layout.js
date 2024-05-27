@@ -1,12 +1,10 @@
 import "bootstrap-icons/font/bootstrap-icons.css";
-
+import SessionProviderWrapper from "../components/SessionProviderWrapper";
 import "./globals.css";
 
-import SessionProviderWrapper from "../components/SessionProviderWrapper";
+// import { DM_Sans } from "next/font/google";
 
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+// const dm_sans = DM_Sans({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Create Next App",

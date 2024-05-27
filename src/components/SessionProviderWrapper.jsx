@@ -1,6 +1,6 @@
 // components/SessionProviderWrapper.js
 "use client";
-import "../app/globals.css";
+// import "../app/globals.css";
 
 import { SessionProvider } from "next-auth/react";
 
