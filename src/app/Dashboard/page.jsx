@@ -1,17 +1,16 @@
 // page.jsx
 "use client";
-import "../Dashboard/modal.css";
 import Header from "@/components/TopBar";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import "../Dashboard/modal.css";
 import Modal from "./Modal";
 import Modal2 from "./Modal2";
-import { useSession } from "next-auth/react";
 
 export default function Home() {
-
-  const { data: session, status } = useSession([]);
-  console.log(data, status)
+  const { data: session } = useSession();
+  // console.log(data);
   const [teams, setTeams] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,15 +18,20 @@ export default function Home() {
   const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState(null);
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchUserTeams();
-    }
-  }, [status]);
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     fetchUserTeams();
+  //   }
+  // }, [status]);
 
   const fetchUserTeams = async () => {
     try {
-      const userId = session?.user?.id;
+      const userId = 36;
+      console.log("Aqui Inicia");
+      console.log(session.user.email);
+      console.log(session.user.id);
+      console.log(session.user.username);
+      console.log("Termian");
       if (!userId) {
         return;
       }
@@ -65,7 +69,7 @@ export default function Home() {
 
   const handleDelete = async () => {
     try {
-      const userId = session?.user?.id;
+      // const userId = session?.user?.id;
       if (!userId) {
         return;
       }
