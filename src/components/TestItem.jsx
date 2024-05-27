@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 
-const TestItem = ({ title, testCount, passPercentage, testId }) => {
+const TestItem = ({ params, title, testCount, passPercentage, testId }) => {
   const getStatusColor = (percentage) => {
     if (percentage >= 80) return 'bg-green-500';
     if (percentage >= 50) return 'bg-yellow-500';
@@ -26,13 +26,18 @@ const TestItem = ({ title, testCount, passPercentage, testId }) => {
     }
   };
 
+  const teamId = params?.teamId ?? 'defaultTeamId'; // Fallback value
+  const directoryId = params?.directoryId ?? 'defaultDirectoryId'; // Fallback value
+
   return (
     <div className="flex items-center justify-between mb-4 bg-white rounded-lg" style={{ width: '880px', height: '85px' }}>
       <div className="flex items-center" style={{ width: '178px', height: '85px', flexShrink: 0, backgroundColor: '#FBFAFF', borderRadius: '10px 0 0 10px', padding: '0 16px' }}>
-      <a href="/Pruebas">
-      <div className="flex items-center justify-center w-9 h-9 bg-blue-900 rounded-full hover:bg-blue-800">
-        <img src="/img/play.svg" alt="Play" className="w-3 h-3 ml-0.5" />
-      </div>
+
+        {/* aqui el href alvera */}
+        <a href={`/Dashboard/${teamId}/${directoryId}/${testId}`}>
+        <div className="flex items-center justify-center w-9 h-9 bg-blue-900 rounded-full hover:bg-blue-800">
+          <img src="/img/play.svg" alt="Play" className="w-3 h-3 ml-0.5" />
+        </div>
       </a>
 
         <p className="ml-2 text-sm font-medium text-black">Start Test</p>
