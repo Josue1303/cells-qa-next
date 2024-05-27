@@ -1,66 +1,58 @@
 // pages/tests.jsx
 
+"use client";
+
 import React from 'react';
 import TestItem from '@/components/TestItem';
 import TestComponent from '@/components/TestComponent';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import DownloadButton from '@/components/DownloadComponent';
+import Sidebar from '@/components/Sidebar';
 
 const Tests = () => {
-  const testItems = [
-    {
-      title: 'Test Index.html',
-      testCount: 8,
-      passPercentage: 90,
-      passedTests: ['No.1', 'No.2', 'No.3'],
-      rejectedTests: ['No.4', 'No.6'],
-      notExecutedTests: ['No.5'],
-    },
-    {
-      title: 'Test Content.js',
-      testCount: 5,
-      passPercentage: 80,
-      passedTests: ['No.1', 'No.2', 'No.3', 'No.4'],
-      rejectedTests: ['No.5'],
-      notExecutedTests: [],
-    },
-    {
-      title: 'Tuputamadre.js',
-      testCount: 5,
-      passPercentage: 40,
-      passedTests: ['Chupala puto', 'No.2', 'No.3', 'No.4'],
-      rejectedTests: ['No.5'],
-      notExecutedTests: [],
-    },
-    {
-      title: 'Envergados.js',
-      testCount: 7,
-      passPercentage: 70,
-      passedTests: ['Chupala puto', 'No.2', 'No.3', 'No.4'],
-      rejectedTests: ['No.5'],
-      notExecutedTests: [],
-    },
-    {
-      title: 'mierdas.js',
-      testCount: 13,
-      passPercentage: 20,
-      passedTests: ['Chupala puto', 'No.2', 'No.3', 'No.4'],
-      rejectedTests: ['No.5'],
-      notExecutedTests: [],
-    },
-   
-  ];
+  const [testItems, setTestItems] = useState([]);
+
+  useEffect(() => {
+    const fetchTestMetrics = async () => {
+      try {
+        const directoryId = 46; 
+        const response = await axios.get(`/api/tests/test-metrics/${directoryId}`); 
+        setTestItems(response.data);
+        console.log("Test metrics fetched:", response.data)
+      } catch (error) {
+        console.error("Error fetching test metrics:", error);
+      }
+    };
+
+    fetchTestMetrics();
+  }, []);
+
+  if (testItems.length === 0) {
+    
+    return <div> 
+      <Sidebar page="Test"></Sidebar> 
+      <h1 className='ml-40 pt-10'> Loading... </h1>
+    </div>;
+  }
+
 
   return (
+    
     <div className="p-6 bg-gray-100 flex justify-center">
+      <Sidebar page="Test"></Sidebar>
       <div className="flex flex-col md:flex-row md:space-x-4 max-w-6xl w-full">
         <div className="flex-1 space-y-4">
           {testItems.map((item, index) => (
             <TestItem
               key={index}
+              testId={item.testId}
               title={item.title}
               testCount={item.testCount}
               passPercentage={item.passPercentage}
             />
           ))}
+          <DownloadButton directoryId={46} /> 
         </div>
 
         {/*componente de la drecha con progress bar pinches putos de cagada */}

@@ -11,6 +11,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
   const [overall, setOverall] = useState("NP");
   const [showModal, setShowModal] = useState(false);
   const [suggestedFallback, setSuggestedFallback] = useState(null);
+  const [testId, setTestId] = useState(1);
 
   const addInstruction = () => {
     setInstructions([
@@ -101,30 +102,32 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     setShowModal(false);
     setSuggestedFallback(null);
   };
-const handleInstructionsAndTest = async () => {
-    // Verificar si la URL está vacía
+
+  const handleInstructionsAndTest = async () => {
     if (url === "") {
       setError2("Por favor ingrese la URL.");
       return;
     }
-
+  
+    if (!/^https?:\/\//i.test(url)) {
+      setError2("La URL debe comenzar con http:// o https://");
+      return;
+    }
+  
     setError2("");
-
+  
     if (instructions.length === 0) {
       setError("No hay instrucciones");
       return;
     }
-
-    // Verificar si hay instrucciones incompletas
+  
     for (let i = 0; i < instructions.length; i++) {
       const instruction = instructions[i];
       if (
         instruction.action === "click" &&
         (instruction.searchKey === "" || instruction.searchBy === "")
       ) {
-        setError(
-          `Por favor llene todos los campos para la instrucción ${i + 1}.`
-        );
+        setError(`Por favor llene todos los campos para la instrucción ${i + 1}.`);
         return;
       } else if (
         (instruction.action === "sendKeys" ||
@@ -134,50 +137,55 @@ const handleInstructionsAndTest = async () => {
           instruction.searchBy === "" ||
           instruction.textInput === "")
       ) {
-        setError(
-          `Por favor llene todos los campos para la instrucción ${i + 1}.`
-        );
+        setError(`Por favor llene todos los campos para la instrucción ${i + 1}.`);
         return;
       }
     }
-
-    // Limpiar el mensaje de error
+  
     setError("");
-
-    // Envía las instrucciones y la URL al backend para ejecutar la automatización
+  
+    console.log("Instrucciones:", instructions);
+  
     try {
-        const response = await axios.post("/api/tests/run-test", {
-            instructions,
-            url,
-        });
-        const results = response.data.results;
-        const newInstructions = [...instructions];
-
-        results.forEach((result, index) => {
-            if (result.status === 'Fallback') {
-                setSuggestedFallback({
-                    instructionIndex: index,
-                    fallback: result.fallback,
-                });
-                setShowModal(true);
-                newInstructions[index].status = 'Failed';
-            } else {
-                newInstructions[index].status = result.status;
-            }
-        });
-
-        setInstructions(newInstructions);
+      const response = await axios.post("http://localhost:3005/api/tests/run-test", {
+        testId,
+        instructions,
+        url,
+      });
+  
+      console.log("Test results:", response.data);
+  
+      const results = response.data.results;
+      const newInstructions = [...instructions];
+  
+      results.forEach((result, index) => {
+        if (result.status === "Fallback") {
+          setSuggestedFallback({
+            instructionIndex: index,
+            fallback: result.fallback,
+          });
+          setShowModal(true);
+          newInstructions[index].status = "Failed";
+        } else {
+          newInstructions[index].status = result.status;
+        }
+      });
+  
+      setInstructions(newInstructions);
     } catch (error) {
-        console.error("Error al ejecutar la prueba:", error);
-        alert("Error al ejecutar la prueba.");
+      console.error("Error al ejecutar la prueba:", error);
+      if (error.response && error.response.data) {
+        setError(`Error: ${error.response.data.error}`);
+      } else {
+        setError("Error al ejecutar la prueba.");
+      }
     }
-    // Llama a la función de cambio de instrucciones para mantener la sincronización de datos
+  
     onInstructionsChange(instructions);
   };
 
   return (
-
-      <div>
+    <div>
       <div>
         <div className="flex justify-start items-center py-5 mr-24">
           <label htmlFor="urlInput" className="mr-3">
@@ -460,7 +468,8 @@ const handleInstructionsAndTest = async () => {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow">
             <p>
-              No se pudo encontrar un componente con el selector proporcionado. El match más parecido es:
+              No se pudo encontrar un componente con el selector proporcionado.
+              El match más parecido es:
             </p>
             <pre>{JSON.stringify(suggestedFallback.fallback, null, 2)}</pre>
             <p>¿Deseas continuar con este selector?</p>
