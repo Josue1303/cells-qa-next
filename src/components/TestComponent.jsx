@@ -6,8 +6,13 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 const TestComponent = ({ name, percentage, passedTests, rejectedTests, notExecutedTests }) => {
+  const totalTests = passedTests.length + rejectedTests.length + notExecutedTests.length;
+  const baseHeight = 292;
+  const extraHeightPerTest = 20;
+  const height = baseHeight + totalTests * extraHeightPerTest;
+
   return (
-    <div className="w-[326px] h-[292px] flex-shrink-0 rounded-[16px] bg-white p-4 shadow-lg">
+    <div className="w-[326px] flex-shrink-0 rounded-[16px] bg-white p-4 shadow-lg" style={{ minHeight: `${baseHeight}px`, height: `${height}px` }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <div className="relative w-[39px] h-[39px] flex-shrink-0">

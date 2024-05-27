@@ -25,7 +25,7 @@ const Sidebar = ({ page }) => {
           </li>
           <li className="px-2">
             <a
-              href="/Pruebas"
+              href="/Hometests"
               className={`flex justify-center flex-row items-center py-2 rounded-lg   ${
                 page === "Test"
                   ? "text-white text-[20px]  bg-[#24374B]"

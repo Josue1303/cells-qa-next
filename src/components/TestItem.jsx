@@ -1,20 +1,40 @@
-// que chingue a su reputa madre el reto
-
 import React from 'react';
+import axios from 'axios';
 
-const TestItem = ({ title, testCount, passPercentage }) => {
+const TestItem = ({ title, testCount, passPercentage, testId }) => {
   const getStatusColor = (percentage) => {
     if (percentage >= 80) return 'bg-green-500';
     if (percentage >= 50) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
+  const handleExport = async () => {
+    try {
+      console.log('Exporting test:', testId)
+      const response = await axios.get(`/api/tests/individual-metrics/${testId}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `test_${testId}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error exporting the test:', error);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between mb-4 bg-white rounded-lg" style={{ width: '880px', height: '85px' }}>
       <div className="flex items-center" style={{ width: '178px', height: '85px', flexShrink: 0, backgroundColor: '#FBFAFF', borderRadius: '10px 0 0 10px', padding: '0 16px' }}>
-        <div className="flex items-center justify-center w-9 h-9 bg-blue-900 rounded-full">
-          <img src="/img/play.svg" alt="Play" className="w-4 h-4" />
-        </div>
+      <a href="/Pruebas">
+      <div className="flex items-center justify-center w-9 h-9 bg-blue-900 rounded-full hover:bg-blue-800">
+        <img src="/img/play.svg" alt="Play" className="w-3 h-3 ml-0.5" />
+      </div>
+      </a>
+
         <p className="ml-2 text-sm font-medium text-black">Start Test</p>
       </div>
 
@@ -36,9 +56,13 @@ const TestItem = ({ title, testCount, passPercentage }) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between w-40 h-10 px-4 py-2 ml-2 bg-gray-100 rounded-lg" style={{ width: '80px', height: '39px', marginLeft: '50px' }}>
+        <div
+          onClick={handleExport}
+          className="flex items-center justify-between w-40 h-10 px-4 py-2 ml-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
+          style={{ width: '100px', height: '39px', marginLeft: '50px' }}
+        >
           <img src="/img/edit.svg" alt="Edit" className="w-4 h-4" />
-          <p className="ml-2 text-sm font-medium text-[#4673B6]">Edit</p>
+          <p className="ml-2 text-sm font-medium text-[#4673B6]">Export</p>
         </div>
       </div>
     </div>

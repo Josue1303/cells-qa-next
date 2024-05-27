@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model directories {
   directoryId       Int           @id @default(autoincrement())
   directoryName     String
@@ -17,13 +18,13 @@ model directories {
   versions          Int?
   teamId            Int
   descripcion       String?
-  directories       directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: Cascade, onUpdate: NoAction, map: "directories_dfather_fkey")
+  directories       directories?  @relation("directoriesTodirectories", fields: [directoryFather], references: [directoryId], onDelete: Cascade, onUpdate: NoAction)
   other_directories directories[] @relation("directoriesTodirectories")
-  teams             teams?        @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction, map: "directories_teamid_fkey")
+  teams             teams?        @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction)
   files             files[]
-
-  @@index([directoryFather], map: "fki_directories_dfather_fkey")
+  tests             tests[]       @relation("DirectoryTests") // Added relation field
 }
+
 
 model files {
   fileId      Int          @id @default(autoincrement())
@@ -49,7 +50,7 @@ model instructions {
   searchBy          String
   textInput         String
   instructionStatus Boolean @default(false)
-  tests             tests   @relation(fields: [testId], references: [testId], onDelete: NoAction, onUpdate: NoAction)
+  tests             tests   @relation(fields: [testId], references: [testId], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model teams {
@@ -58,7 +59,6 @@ model teams {
   code        String?
   directories directories[]
   files       files[]
-  tests       tests[]
   user_teams  user_teams[]
 }
 
@@ -68,11 +68,14 @@ model tests {
   testStatus   Boolean
   createdAt    DateTime       @db.Date
   modifiedAt   DateTime       @db.Date
-  teamId       Int?
+  directoryId  Int
   instructions instructions[]
-  teams        teams?         @relation(fields: [teamId], references: [teamId], onDelete: Cascade, onUpdate: NoAction, map: "tests_teamid_fkey")
-  users        users          @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "tests_userid_fkey")
+  title        String  
+  directories  directories?   @relation(fields: [directoryId], references: [directoryId], onDelete: Cascade, onUpdate: NoAction, name: "DirectoryTests")
+  users        users          @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 }
+
+
 
 model user_teams {
   userId Int
