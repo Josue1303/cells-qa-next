@@ -229,7 +229,7 @@ const exportTestMetricsToCSV = async (req, res) => {
         passPercentage: passPercentage.toFixed(2),
         passedTests: passedTests.join(', '),
         rejectedTests: rejectedTests.join(', '),
-        notExecutedTests: [], // Include this field even if it's empty for consistency
+        notExecutedTests: [], // me pelan toda la verga
         instructions: test.instructions.map(inst => ({
           instructionId: inst.instructionId,
           action: inst.action,
@@ -244,14 +244,13 @@ const exportTestMetricsToCSV = async (req, res) => {
 
     const csv = await parseAsync(testMetrics, { fields: ["testId", "title", "testCount", "passPercentage", "passedTests", "rejectedTests", "notExecutedTests", "instructions"] });
 
-    // Define the file path to save the CSV
     const exportsDir = path.join(__dirname, '../../exports');
     if (!fs.existsSync(exportsDir)) {
       fs.mkdirSync(exportsDir);
     }
     const filePath = path.join(exportsDir, 'test_metrics.csv');
     
-    // Write the CSV to a file
+    
     fs.writeFileSync(filePath, csv);
     console.log(`CSV file written successfully to ${filePath}`);
 
@@ -263,7 +262,7 @@ const exportTestMetricsToCSV = async (req, res) => {
       } else {
         console.log('File sent successfully');
       }
-      // Optionally delete the file after sending it to the client
+      // Optionally delete the file after sending it to the client CHECAR BIEN ESTE PEDO SIU REMINDER
       fs.unlinkSync(filePath);
     });
   } catch (error) {

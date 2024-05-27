@@ -55,6 +55,7 @@ export default function Home({ params }) {
       const response = await axios.get(
         `http://localhost:3005/api/projects/dfather/${params.teamId}`
       );
+      console.log("Data fetched:", response.data);
       setDirectories(response.data);
       setFilteredDirectories(response.data);
     } catch (error) {
@@ -150,7 +151,7 @@ export default function Home({ params }) {
                   <div className="table-r-l">
                     <a
                       className="button !bg-[#24374B] hover:!bg-[#1b2a39]"
-                      href="/Pruebas"
+                      href={`/Dashboard/${params.teamId}/${directory.directoryId}`}
                     >
                       Acceder
                     </a>
