@@ -112,11 +112,11 @@ const Tests = ({ params }) => {
         {/*componente de la drecha con progress bar pinches putos de cagada */}
         <div className="mt-4 md:mt-0 md:ml-2 lg:ml-4 flex justify-center md:justify-start">
           <TestComponent
-            name={testItems[0].title}
-            percentage={testItems[0].passPercentage}
-            passedTests={testItems[0].passedTests}
-            rejectedTests={testItems[0].rejectedTests}
-            notExecutedTests={testItems[0].notExecutedTests}
+            name={testItems[1].title}
+            percentage={testItems[1].passPercentage}
+            passedTests={testItems[1].passedTests}
+            rejectedTests={testItems[1].rejectedTests}
+            notExecutedTests={testItems[1].notExecutedTests}
           />
         </div>
       </div>

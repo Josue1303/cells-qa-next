@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Selector = ({ onInstructionsChange, onUrlChange }) => {
+const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [instructions, setInstructions] = useState([
-    { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" }, // Instrucción predeterminada
+    { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" },
   ]);
+
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
   const [overall, setOverall] = useState("NP");
   const [showModal, setShowModal] = useState(false);
   const [suggestedFallback, setSuggestedFallback] = useState(null);
-  const [testId, setTestId] = useState(1);
+  const [testId, setTestId] = useState(null);
+
+  useEffect(() => {
+    setTestId(tesId);
+  }, [tesId]);
+
+  console.log(testId);
 
   const addInstruction = () => {
     setInstructions([
@@ -55,16 +62,13 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
     setOverall("NP");
 
     if (selectedAction === "click") {
-      // Si la acción seleccionada es "click", habilitar todos los campos excepto "Acción"
       newInstructions[index].action = selectedAction;
       newInstructions[index].textInput = "";
       newInstructions[index].searchKey = "";
       newInstructions[index].searchBy = "";
     } else if (selectedAction !== "") {
-      // Si se selecciona cualquier otra acción, habilitar todos los campos
       newInstructions[index].action = selectedAction;
     } else {
-      // Si no se ha seleccionado ninguna acción, deshabilitar todos los campos
       newInstructions[index].action = "";
       newInstructions[index].textInput = "";
       newInstructions[index].searchKey = "";
@@ -83,7 +87,6 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
 
   const handleFallbackConfirmation = async (confirm) => {
     if (confirm) {
-      // Proceder con el selector fallback sugerido
       const updatedInstructions = instructions.map((instruction, index) => {
         if (index === suggestedFallback.instructionIndex) {
           return {
@@ -95,9 +98,6 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         return instruction;
       });
       setInstructions(updatedInstructions);
-    } else {
-      // Regresar y permitir al usuario modificar el selector
-      // No se realiza ninguna acción adicional
     }
     setShowModal(false);
     setSuggestedFallback(null);
@@ -108,19 +108,19 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
       setError2("Por favor ingrese la URL.");
       return;
     }
-  
+
     if (!/^https?:\/\//i.test(url)) {
       setError2("La URL debe comenzar con http:// o https://");
       return;
     }
-  
+
     setError2("");
-  
+
     if (instructions.length === 0) {
       setError("No hay instrucciones");
       return;
     }
-  
+
     for (let i = 0; i < instructions.length; i++) {
       const instruction = instructions[i];
       if (
@@ -141,23 +141,23 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         return;
       }
     }
-  
+
     setError("");
-  
+
     console.log("Instrucciones:", instructions);
-  
+
     try {
       const response = await axios.post("http://localhost:3005/api/tests/run-test", {
         testId,
         instructions,
         url,
       });
-  
+
       console.log("Test results:", response.data);
-  
+
       const results = response.data.results;
       const newInstructions = [...instructions];
-  
+
       results.forEach((result, index) => {
         if (result.status === "Fallback") {
           setSuggestedFallback({
@@ -170,7 +170,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
           newInstructions[index].status = result.status;
         }
       });
-  
+
       setInstructions(newInstructions);
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
@@ -180,7 +180,7 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
         setError("Error al ejecutar la prueba.");
       }
     }
-  
+
     onInstructionsChange(instructions);
   };
 
@@ -255,14 +255,14 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
           <div className="flex mx-5 my-4">
             <h3>No.</h3>
             <div className="flex ml-5">
-              <h3 className="w-60   bg-white">Action</h3>
-              <h3 className="w-60 ml-2  bg-white">Search By</h3>
-              <h3 className="w-60 ml-2  bg-white">Search Key</h3>
-              <h3 className="w-60 ml-2  bg-white">Input</h3>
+              <h3 className="w-60 bg-white">Action</h3>
+              <h3 className="w-60 ml-2 bg-white">Search By</h3>
+              <h3 className="w-60 ml-2 bg-white">Search Key</h3>
+              <h3 className="w-60 ml-2 bg-white">Input</h3>
             </div>
             <div className="flex ml-7">
-              <h3 className="w-24  bg-white">Status</h3>
-              <h3 className="w-24  bg-white">Delete</h3>
+              <h3 className="w-24 bg-white">Status</h3>
+              <h3 className="w-24 bg-white">Delete</h3>
             </div>
           </div>
           {instructions.map((instruction, index) => (
@@ -271,7 +271,6 @@ const Selector = ({ onInstructionsChange, onUrlChange }) => {
                 <div className="flex items-center w-full">
                   <h3 className="font-bold w-4 mx-5 ml-6">{index + 1}</h3>
 
-                  {/* Accion */}
                   <div className="px-3">
                     <select
                       value={instruction.action}

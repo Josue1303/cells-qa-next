@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-const TestComponent = ({ name, percentage, passedTests, rejectedTests, notExecutedTests }) => {
+const TestComponent = ({ name, percentage, passedTests = [], rejectedTests = [], notExecutedTests = [] }) => {
   const totalTests = passedTests.length + rejectedTests.length + notExecutedTests.length;
   const baseHeight = 292;
   const extraHeightPerTest = 20;
