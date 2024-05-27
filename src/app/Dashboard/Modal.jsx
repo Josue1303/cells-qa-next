@@ -2,7 +2,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 
-function Modal({ onClose, refreshTeams }) {
+function Modal({ onClose, refreshTeams, userId }) {
   const [teamName, setTeamName] = useState("");
 
   const handleOutsideClick = (event) => {
@@ -17,7 +17,7 @@ function Modal({ onClose, refreshTeams }) {
         "http://localhost:3005/api/teams/createTeam",
         {
           teamName,
-          userId: 36,
+          userId: userId,
         }
       );
       if (response.status === 201) {

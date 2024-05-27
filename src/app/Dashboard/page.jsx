@@ -131,18 +131,23 @@ export default function Home() {
                 className="bg-white p-6 shadow-lg rounded-lg mb-8 flex flex-col justify-center items-center text-center"
                 style={{ width: 363, height: 240 }}
               >
-                <div className="table-r-r self-end">
+                <div className="table-r-r self-end ">
                   <i
-                    className="bi bi-trash3-fill text-gray-300 text-xl "
+                    className="bi bi-trash3-fill text-gray-300 text-xl hover:text-red-500 hover:cursor-pointer "
                     onClick={() => openModal(team.teamId)}
                   ></i>
                 </div>
-                <img
-                  style={{ marginBottom: "10px" }}
-                  src="/img/iconoTeam.svg"
-                />
-                <p className="font-bold text-xl">{team.teamName}</p>
-                <p className="text-sm text-gray-400">Codigo: {team.code}</p>
+                <a href={`/Dashboard/${team.teamId}`}>
+                  <div className=" flex justify-center">
+                    <img
+                      style={{ marginBottom: "10px" }}
+                      src="/img/iconoTeam.svg"
+                    />
+                  </div>
+
+                  <p className="font-bold text-xl">{team.teamName}</p>
+                  <p className="text-sm text-gray-400">Codigo: {team.code}</p>
+                </a>
               </div>
             ))}
 
@@ -164,12 +169,14 @@ export default function Home() {
         <Modal
           onClose={() => setIsModalOpen(false)}
           refreshTeams={fetchUserTeams}
+          userId={session.user.id}
         />
       )}
       {isModalOpen2 && (
         <Modal2
           onClose={() => setIsModalOpen2(false)}
           refreshTeams={fetchUserTeams}
+          userId={session.user.id}
         />
       )}
       {isModalOpen3 && (
