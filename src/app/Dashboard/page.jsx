@@ -7,10 +7,12 @@ import { useEffect, useState } from "react";
 import "../Dashboard/modal.css";
 import Modal from "./Modal";
 import Modal2 from "./Modal2";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { data: session, status } = useSession();
   // console.log(data);
+  const router = useRouter();
   const [teams, setTeams] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,8 +89,9 @@ export default function Home() {
     return <div>Loading...</div>;
   }
   if (status === "unauthenticated") {
-    return <div>Unauthenticated</div>;
+    return router.push("/Login");
   }
+
 
   return (
     <main className="flex flex-col min-h-screen">

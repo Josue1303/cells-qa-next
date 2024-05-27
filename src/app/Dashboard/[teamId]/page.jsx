@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import "./folView.css";
+import { useRouter } from "next/navigation";
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -28,27 +29,27 @@ export default function Home({ params }) {
   const [selectedDirectoryId, setSelectedDirectoryId] = useState(null);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [teams, setTeams] = useState([]);
-
-  const fetchUserTeams = async () => {
-    try {
-      const userId = session?.user?.id;
-      // console.log("Aqui Inicia");
-      // console.log(session.user.email);
-      // console.log(session.user.id);
-      // console.log(session.user.username);
-      // console.log("Termian");
-      if (!userId) {
-        return;
-      }
-      const response = await axios.get(
-        `http://localhost:3005/api/teams/${userId}/teams`
-      );
-      console.log("Equipos del usuario  :", response.data.teams);
-      setTeams(response.data.teams);
-    } catch (error) {
-      console.error("Error al obtener los equipos del usuario:", error);
-    }
-  };
+  const router = useRouter();
+  // const fetchUserTeams = async () => {
+  //   try {
+  //     const userId = session?.user?.id;
+  //     // console.log("Aqui Inicia");
+  //     // console.log(session.user.email);
+  //     // console.log(session.user.id);
+  //     // console.log(session.user.username);
+  //     // console.log("Termian");
+  //     if (!userId) {
+  //       return router.push("/Login");
+  //     }
+  //     const response = await axios.get(
+  //       `http://localhost:3005/api/teams/${userId}/teams`
+  //     );
+  //     console.log("Equipos del usuario  :", response.data.teams);
+  //     setTeams(response.data.teams);
+  //   } catch (error) {
+  //     console.error("Error al obtener los equipos del usuario:", error);
+  //   }
+  // };
 
   const fetchData = async () => {
     try {
@@ -106,7 +107,7 @@ export default function Home({ params }) {
     return <div>Loading...</div>;
   }
   if (status === "unauthenticated") {
-    return <div>Unauthenticated</div>;
+    return router.push("/Login");
   }
 
   return (
