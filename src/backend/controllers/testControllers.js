@@ -1,10 +1,11 @@
 const { setupWebDriver, runTest } = require("../services/selenium");
 const { parseCSV, executeTests } = require("../services/csv");
 const { PrismaClient } = require("@prisma/client");
-const { parseAsync } = require('json2csv');
+const { parseAsync } = require("json2csv");
 const prisma = new PrismaClient();
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
+const { default: test } = require("node:test");
 
 const runTests = async (req, res) => {
   try {
@@ -14,17 +15,18 @@ const runTests = async (req, res) => {
 
     const { instructions, url, testId } = req.body;
 
-  
     if (!/^https?:\/\//i.test(url)) {
       throw new Error("Invalid URL: Missing HTTP/HTTPS scheme.");
     }
 
-    
     const instructionPromises = instructions.map((instruction, index) => {
       const { action, searchKey, searchBy, textInput } = instruction;
+
+      const testIdInt = parseInt(testId, 10);
+
       return prisma.instructions.create({
         data: {
-          testId,
+          testId: testIdInt,
           action,
           sequence: index + 1,
           searchKey,
@@ -38,7 +40,6 @@ const runTests = async (req, res) => {
     const createdInstructions = await Promise.all(instructionPromises);
     console.log("Created Instructions:", createdInstructions);
 
-    
     const results = await runTest(driver, instructions, url);
     console.log("Test results:", results);
 
@@ -55,7 +56,7 @@ const runTests = async (req, res) => {
     res.status(200).json({ results });
   } catch (error) {
     console.error("Error during test execution:", error);
-    
+
     res.status(500).json({ error: error.message, stack: error.stack });
   } finally {
     await prisma.$disconnect();
@@ -72,7 +73,6 @@ const createTest = async (req, res) => {
         .json({ error: "userId, directoryId, and title are required fields." });
     }
 
-    
     const userExists = await prisma.users.findUnique({
       where: { userId },
     });
@@ -82,7 +82,6 @@ const createTest = async (req, res) => {
         .json({ error: "Invalid userId, user does not exist." });
     }
 
-    
     const directoryExists = await prisma.directories.findUnique({
       where: { directoryId },
     });
@@ -92,15 +91,14 @@ const createTest = async (req, res) => {
         .json({ error: "Invalid directoryId, directory does not exist." });
     }
 
-    
     const newTest = await prisma.tests.create({
       data: {
         userId,
         directoryId,
         title,
-        testStatus: false, 
-        createdAt: new Date(), 
-        modifiedAt: new Date(), 
+        testStatus: false,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
       },
     });
 
@@ -142,10 +140,8 @@ const calculateAllTestMetrics = async (req, res) => {
   try {
     const { directoryId } = req.params;
 
-    
     const dirId = parseInt(directoryId);
 
-    
     const tests = await prisma.tests.findMany({
       where: {
         directoryId: dirId,
@@ -163,18 +159,23 @@ const calculateAllTestMetrics = async (req, res) => {
     });
 
     if (!tests.length) {
-      return res.status(404).json({ error: 'No tests found for this directory' });
+      return res
+        .status(404)
+        .json({ error: "No tests found for this directory" });
     }
 
-    
-    const testMetrics = tests.map(test => {
+    const testMetrics = tests.map((test) => {
       const testCount = test.instructions.length;
-      const passedInstructions = test.instructions.filter(i => i.instructionStatus);
-      const rejectedInstructions = test.instructions.filter(i => !i.instructionStatus);
+      const passedInstructions = test.instructions.filter(
+        (i) => i.instructionStatus
+      );
+      const rejectedInstructions = test.instructions.filter(
+        (i) => !i.instructionStatus
+      );
 
       const passPercentage = (passedInstructions.length / testCount) * 100;
-      const passedTests = passedInstructions.map(i => `No.${i.sequence}`);
-      const rejectedTests = rejectedInstructions.map(i => `No.${i.sequence}`);
+      const passedTests = passedInstructions.map((i) => `No.${i.sequence}`);
+      const rejectedTests = rejectedInstructions.map((i) => `No.${i.sequence}`);
 
       return {
         testId: test.testId,
@@ -183,7 +184,7 @@ const calculateAllTestMetrics = async (req, res) => {
         passPercentage: passPercentage.toFixed(2),
         passedTests,
         rejectedTests,
-        notExecutedTests: [], 
+        notExecutedTests: [],
       };
     });
 
@@ -210,27 +211,33 @@ const exportTestMetricsToCSV = async (req, res) => {
     });
 
     if (!tests.length) {
-      return res.status(404).json({ error: 'No tests found for this directory' });
+      return res
+        .status(404)
+        .json({ error: "No tests found for this directory" });
     }
 
-    const testMetrics = tests.map(test => {
+    const testMetrics = tests.map((test) => {
       const testCount = test.instructions.length;
-      const passedInstructions = test.instructions.filter(i => i.instructionStatus);
-      const rejectedInstructions = test.instructions.filter(i => !i.instructionStatus);
+      const passedInstructions = test.instructions.filter(
+        (i) => i.instructionStatus
+      );
+      const rejectedInstructions = test.instructions.filter(
+        (i) => !i.instructionStatus
+      );
 
       const passPercentage = (passedInstructions.length / testCount) * 100;
-      const passedTests = passedInstructions.map(i => `No.${i.sequence}`);
-      const rejectedTests = rejectedInstructions.map(i => `No.${i.sequence}`);
+      const passedTests = passedInstructions.map((i) => `No.${i.sequence}`);
+      const rejectedTests = rejectedInstructions.map((i) => `No.${i.sequence}`);
 
       return {
         testId: test.testId,
         title: test.title,
         testCount,
         passPercentage: passPercentage.toFixed(2),
-        passedTests: passedTests.join(', '),
-        rejectedTests: rejectedTests.join(', '),
+        passedTests: passedTests.join(", "),
+        rejectedTests: rejectedTests.join(", "),
         notExecutedTests: [], // me pelan toda la verga
-        instructions: test.instructions.map(inst => ({
+        instructions: test.instructions.map((inst) => ({
           instructionId: inst.instructionId,
           action: inst.action,
           sequence: inst.sequence,
@@ -238,29 +245,39 @@ const exportTestMetricsToCSV = async (req, res) => {
           searchBy: inst.searchBy,
           textInput: inst.textInput,
           instructionStatus: inst.instructionStatus,
-        }))
+        })),
       };
     });
 
-    const csv = await parseAsync(testMetrics, { fields: ["testId", "title", "testCount", "passPercentage", "passedTests", "rejectedTests", "notExecutedTests", "instructions"] });
+    const csv = await parseAsync(testMetrics, {
+      fields: [
+        "testId",
+        "title",
+        "testCount",
+        "passPercentage",
+        "passedTests",
+        "rejectedTests",
+        "notExecutedTests",
+        "instructions",
+      ],
+    });
 
-    const exportsDir = path.join(__dirname, '../../exports');
+    const exportsDir = path.join(__dirname, "../../exports");
     if (!fs.existsSync(exportsDir)) {
       fs.mkdirSync(exportsDir);
     }
-    const filePath = path.join(exportsDir, 'test_metrics.csv');
-    
-    
+    const filePath = path.join(exportsDir, "test_metrics.csv");
+
     fs.writeFileSync(filePath, csv);
     console.log(`CSV file written successfully to ${filePath}`);
 
     // Send the file to the client
-    res.download(filePath, 'test_metrics.csv', (err) => {
+    res.download(filePath, "test_metrics.csv", (err) => {
       if (err) {
-        console.error('Error sending the file:', err);
-        res.status(500).json({ error: 'Error sending the file' });
+        console.error("Error sending the file:", err);
+        res.status(500).json({ error: "Error sending the file" });
       } else {
-        console.log('File sent successfully');
+        console.log("File sent successfully");
       }
       // Optionally delete the file after sending it to the client CHECAR BIEN ESTE PEDO SIU REMINDER
       fs.unlinkSync(filePath);
@@ -278,7 +295,6 @@ const exportIndividualTestMetricsToCSV = async (req, res) => {
     const { testId } = req.params;
     const tId = parseInt(testId, 10);
 
-    
     const test = await prisma.tests.findUnique({
       where: { testId: tId },
       include: {
@@ -287,26 +303,30 @@ const exportIndividualTestMetricsToCSV = async (req, res) => {
     });
 
     if (!test) {
-      return res.status(404).json({ error: 'Test not found' });
+      return res.status(404).json({ error: "Test not found" });
     }
 
     const testCount = test.instructions.length;
-    const passedInstructions = test.instructions.filter(i => i.instructionStatus);
-    const rejectedInstructions = test.instructions.filter(i => !i.instructionStatus);
+    const passedInstructions = test.instructions.filter(
+      (i) => i.instructionStatus
+    );
+    const rejectedInstructions = test.instructions.filter(
+      (i) => !i.instructionStatus
+    );
 
     const passPercentage = (passedInstructions.length / testCount) * 100;
-    const passedTests = passedInstructions.map(i => `No.${i.sequence}`);
-    const rejectedTests = rejectedInstructions.map(i => `No.${i.sequence}`);
+    const passedTests = passedInstructions.map((i) => `No.${i.sequence}`);
+    const rejectedTests = rejectedInstructions.map((i) => `No.${i.sequence}`);
 
     const testMetrics = {
       testId: test.testId,
       title: test.title,
       testCount,
       passPercentage: passPercentage.toFixed(2),
-      passedTests: passedTests.join(', '),
-      rejectedTests: rejectedTests.join(', '),
-      notExecutedTests: [], 
-      instructions: test.instructions.map(inst => ({
+      passedTests: passedTests.join(", "),
+      rejectedTests: rejectedTests.join(", "),
+      notExecutedTests: [],
+      instructions: test.instructions.map((inst) => ({
         instructionId: inst.instructionId,
         action: inst.action,
         sequence: inst.sequence,
@@ -314,31 +334,39 @@ const exportIndividualTestMetricsToCSV = async (req, res) => {
         searchBy: inst.searchBy,
         textInput: inst.textInput,
         instructionStatus: inst.instructionStatus,
-      }))
+      })),
     };
 
-    const csv = await parseAsync([testMetrics], { fields: ["testId", "title", "testCount", "passPercentage", "passedTests", "rejectedTests", "notExecutedTests", "instructions"] });
+    const csv = await parseAsync([testMetrics], {
+      fields: [
+        "testId",
+        "title",
+        "testCount",
+        "passPercentage",
+        "passedTests",
+        "rejectedTests",
+        "notExecutedTests",
+        "instructions",
+      ],
+    });
 
-    
-    const exportsDir = path.join(__dirname, '../../exports');
+    const exportsDir = path.join(__dirname, "../../exports");
     if (!fs.existsSync(exportsDir)) {
       fs.mkdirSync(exportsDir);
     }
     const filePath = path.join(exportsDir, `test_${test.testId}.csv`);
-    
-   
+
     fs.writeFileSync(filePath, csv);
     console.log(`CSV file written successfully to ${filePath}`);
 
- 
     res.download(filePath, `test_${test.testId}.csv`, (err) => {
       if (err) {
-        console.error('Error sending the file:', err);
-        res.status(500).json({ error: 'Error sending the file' });
+        console.error("Error sending the file:", err);
+        res.status(500).json({ error: "Error sending the file" });
       } else {
-        console.log('File sent successfully');
+        console.log("File sent successfully");
       }
-      
+
       fs.unlinkSync(filePath);
     });
   } catch (error) {
@@ -348,13 +376,6 @@ const exportIndividualTestMetricsToCSV = async (req, res) => {
     await prisma.$disconnect();
   }
 };
-
-
-
-
-
-
-
 
 module.exports = {
   createTest,

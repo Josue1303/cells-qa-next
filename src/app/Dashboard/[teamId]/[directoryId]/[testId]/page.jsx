@@ -4,7 +4,7 @@ import Selector from "@/components/Selector";
 import Sidebar from "@/components/Sidebar";
 import React, { useState } from "react";
 
-export default function Home() {
+export default function Home({ params }) {
   const [instructions, setInstructions] = useState([]);
   const [url, setUrl] = useState("");
 
@@ -23,6 +23,7 @@ export default function Home() {
       <Selector
         onInstructionsChange={handleInstructionsChange}
         onUrlChange={handleUrlChange}
+        tesId = { params.testId }
       />
     </main>
   );

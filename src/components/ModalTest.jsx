@@ -10,8 +10,8 @@ function Modal({ onClose, onCreate }) {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    
     console.log("Submitting test name:", testName); // Debugging puto joto
     onCreate(testName);
   };
