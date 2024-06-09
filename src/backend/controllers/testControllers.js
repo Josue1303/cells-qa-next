@@ -377,6 +377,68 @@ const exportIndividualTestMetricsToCSV = async (req, res) => {
   }
 };
 
+const getInstructionsByTestId = async (req, res) => {
+  try {
+    const { testId } = req.params;
+
+    if (!testId) {
+      return res.status(400).json({ error: "testId is required" });
+    }
+
+    const instructions = await prisma.instructions.findMany({
+      where: { testId: parseInt(testId, 10) },
+      orderBy: { sequence: "asc" },
+    });
+
+    if (!instructions.length) {
+      return res
+        .status(404)
+        .json({ error: "No instructions found for this testId" });
+    }
+
+    res.status(200).json(instructions);
+  } catch (error) {
+    console.error("Error fetching instructions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+const deleteTest = async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    const tId = parseInt(testId, 10);
+    if (isNaN(tId)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid testId: Must be an integer." });
+    }
+
+    // Check if the test exists
+    const test = await prisma.tests.findUnique({
+      where: { testId: tId },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    // Delete the test
+    await prisma.tests.delete({
+      where: { testId: tId },
+    });
+
+    res.status(200).json({ message: "Test deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting test:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
 module.exports = {
   createTest,
   runTests,
@@ -384,4 +446,6 @@ module.exports = {
   calculateAllTestMetrics,
   exportTestMetricsToCSV,
   exportIndividualTestMetricsToCSV,
+  getInstructionsByTestId,
+  deleteTest,
 };
