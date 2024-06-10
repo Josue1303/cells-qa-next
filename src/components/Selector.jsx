@@ -136,8 +136,6 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
 
           console.log(suggestedFallback.fallback);
           console.log(instruction);
-          console.log(suggestedFallback.fallback.searchBy);
-          console.log(suggestedFallback.fallback.searchKey);
           return {
             ...instruction,
             searchBy: newSearchBy,
@@ -200,16 +198,14 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
 
     setError("");
 
-    console.log("Instrucciones:", instructions);
+    console.log("Instrucciones Antes de cualquier cosa:", instructions);
 
     try {
-      const newInstructions = instructions.filter((inst) => inst.isNew);
-
       const response = await axios.post(
         "http://localhost:3005/api/tests/run-test",
         {
           testId,
-          instructions: newInstructions,
+          instructions: instructions,
           url,
         }
       );
@@ -226,14 +222,17 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
             fallback: result.fallback,
           });
           setShowModal(true);
-          updatedInstructions[index].status = "Failed";
         } else {
-          updatedInstructions[index].status = result.status;
+          console.log("MIRA AQUI");
+          console.log(updatedInstructions);
+          console.log(updatedInstructions[index]);
+          updatedInstructions[index].status = "Passed";
+          console.log("Resultados de Selenium");
+          console.log(result.status);
         }
-        updatedInstructions[index].isNew = false;
       });
-
       setInstructions(updatedInstructions);
+      console.log(updatedInstructions);
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
       if (error.response && error.response.data) {
@@ -243,7 +242,44 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       }
     }
 
-    onInstructionsChange(instructions);
+    try {
+      console.log("Instrucciones enteras");
+      console.log(instructions);
+      const newInstructions = instructions.filter((inst) => inst.isNew);
+      const postInstructions = [...newInstructions];
+      const noNewInstructions = [...instructions];
+      // Recorre postInstructions y actualiza el status
+      for (let i = 0; i < postInstructions.length; i++) {
+        if (postInstructions[i].status === "Failed") {
+          postInstructions[i].status = false;
+        } else if (postInstructions[i].status === "Passed") {
+          postInstructions[i].status = true;
+        }
+      }
+
+      for (let i = 0; i < noNewInstructions.length; i++) {
+        noNewInstructions[i].isNew = false;
+      }
+
+      const response2 = await axios.post(
+        "http://localhost:3005/api/tests/save-test",
+        {
+          testId,
+          instructions: postInstructions,
+        }
+      );
+      const results = response2.data.results;
+      console.log(results);
+      console.log("Instrucciones no nuevas");
+      setInstructions(noNewInstructions);
+    } catch (error) {
+      console.error("Error al ejecutar la prueba:", error);
+      if (error.response && error.response.data) {
+        setError(`Error: ${error.response.data.error}`);
+      } else {
+        setError("Error al ejecutar la prueba.");
+      }
+    }
   };
 
   return (

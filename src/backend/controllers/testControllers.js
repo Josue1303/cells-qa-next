@@ -13,14 +13,28 @@ const runTests = async (req, res) => {
     const driver = await setupWebDriver();
     console.log("WebDriver setup complete.");
 
-    const { instructions, url, testId } = req.body;
-
-    if (!/^https?:\/\//i.test(url)) {
-      throw new Error("Invalid URL: Missing HTTP/HTTPS scheme.");
+    const results = await runTest(driver, req.body.instructions, req.body.url);
+    console.log("Test results:", results);
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error("Error during test execution:", error);
+    // Send back the error message only in development mode for debugging
+    if (process.env.NODE_ENV === "development") {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).send("Error during test execution.");
     }
+  }
+};
+
+const saveTests = async (req, res) => {
+  try {
+    console.log("Received body:", JSON.stringify(req.body, null, 2));
+
+    const { instructions, testId } = req.body;
 
     const instructionPromises = instructions.map((instruction, index) => {
-      const { action, searchKey, searchBy, textInput } = instruction;
+      const { action, searchKey, searchBy, textInput, status } = instruction;
 
       const testIdInt = parseInt(testId, 10);
 
@@ -32,7 +46,7 @@ const runTests = async (req, res) => {
           searchKey,
           searchBy,
           textInput,
-          instructionStatus: false,
+          instructionStatus: status,
         },
       });
     });
@@ -40,24 +54,11 @@ const runTests = async (req, res) => {
     const createdInstructions = await Promise.all(instructionPromises);
     console.log("Created Instructions:", createdInstructions);
 
-    const results = await runTest(driver, instructions, url);
-    console.log("Test results:", results);
-
-    const updatePromises = results.map((result, index) => {
-      const status = result.status === "Passed";
-      return prisma.instructions.update({
-        where: { instructionId: createdInstructions[index].instructionId },
-        data: { instructionStatus: status },
-      });
-    });
-
-    await Promise.all(updatePromises);
-
-    res.status(200).json({ results });
+    res.status(200);
   } catch (error) {
     console.error("Error during test execution:", error);
 
-    res.status(500).json({ error: error.message, stack: error.stack });
+    res.status(500);
   } finally {
     await prisma.$disconnect();
   }
@@ -448,4 +449,5 @@ module.exports = {
   exportIndividualTestMetricsToCSV,
   getInstructionsByTestId,
   deleteTest,
+  saveTests,
 };
