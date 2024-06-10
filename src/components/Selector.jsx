@@ -41,6 +41,46 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      console.log("Exporting test:", testId);
+      const response = await axios.get(
+        `/api/tests/individual-metrics/${testId}`,
+        {
+          responseType: "blob",
+        }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `test_${testId}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error exporting the test:", error);
+    }
+  };
+
+  const updateInstruction = async (instruction) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3005/api/tests/update-test/${instruction.instructionId}`,
+        {
+          action: instruction.action,
+          sequence: instruction.sequence,
+          searchKey: instruction.searchKey,
+          searchBy: instruction.searchBy,
+          textInput: instruction.textInput,
+          instructionStatus: instruction.status,
+        }
+      );
+    } catch (error) {
+      console.error("Error updating instructions:", error);
+      setError("Failed to updating instructions.");
+    }
+  };
+
   useEffect(() => {
     if (testId) {
       fetchInstructions();
@@ -234,8 +274,6 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
 
     setError("");
 
-    console.log("Instrucciones Antes de cualquier cosa:", instructions);
-
     try {
       const response = await axios.post(
         "http://localhost:3005/api/tests/run-test",
@@ -267,49 +305,55 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       setInstructions(updatedInstructions);
       updateOverallStatus(updatedInstructions);
 
-      if (fallbacks.length > 0) {
-        setPendingFallbacks(fallbacks);
-        setCurrentFallbackIndex(0);
-        setShowModal(true);
-      }
-    } catch (error) {
-      console.error("Error al ejecutar la prueba:", error);
-      if (error.response && error.response.data) {
-        setError(`Error: ${error.response.data.error}`);
-      } else {
-        setError("Error al ejecutar la prueba.");
-      }
-    }
+      try {
+        const newInstructions = instructions.filter((inst) => inst.isNew);
+        const postInstructions = [...newInstructions];
+        const noNewInstructions = [...instructions];
+        // Recorre postInstructions y actualiza el status
+        for (let i = 0; i < postInstructions.length; i++) {
+          if (postInstructions[i].status === "Failed") {
+            postInstructions[i].status = false;
+          } else if (postInstructions[i].status === "Passed") {
+            postInstructions[i].status = true;
+          }
+        }
 
-    try {
-      const newInstructions = instructions.filter((inst) => inst.isNew);
-      const postInstructions = [...newInstructions];
-      const noNewInstructions = [...instructions];
-      // Recorre postInstructions y actualiza el status
-      for (let i = 0; i < postInstructions.length; i++) {
-        if (postInstructions[i].status === "Failed") {
-          postInstructions[i].status = false;
-        } else if (postInstructions[i].status === "Passed") {
-          postInstructions[i].status = true;
+        for (let i = 0; i < noNewInstructions.length; i++) {
+          if (noNewInstructions[i].status === "Passed") {
+            noNewInstructions[i].status = true;
+          } else {
+            noNewInstructions[i].status = false;
+          }
+          if (noNewInstructions[i].isNew == false) {
+            await updateInstruction(noNewInstructions[i]);
+          }
+          noNewInstructions[i].isNew = false;
+        }
+        console.log("Enviando a saveTest");
+        const response2 = await axios.post(
+          "http://localhost:3005/api/tests/save-test",
+          {
+            testId,
+            instructions: postInstructions,
+          }
+        );
+        setInstructions(noNewInstructions);
+        console.log("Fetching 1");
+        await fetchInstructions(); // Fetch the instructions after saving
+
+        if (fallbacks.length > 0) {
+          setPendingFallbacks(fallbacks);
+          setCurrentFallbackIndex(0);
+          setShowModal(true); // Show the modal with fallbacks
+        }
+      } catch (error) {
+        console.error("Error al guardar las instrucciones:", error);
+        if (error.response && error.response.data) {
+          setError(`Error: ${error.response.data.error}`);
+        } else {
+          setError("Error al guardar las instrucciones.");
         }
       }
-
-      for (let i = 0; i < noNewInstructions.length; i++) {
-        noNewInstructions[i].isNew = false;
-      }
-      console.log("Enviando a saveTest");
-      const response2 = await axios.post(
-        "http://localhost:3005/api/tests/save-test",
-        {
-          testId,
-          instructions: postInstructions,
-        }
-      );
-
-      console.log("Terminando de enviar");
-      const results2 = response2.data.results;
-      console.log("Estos son los resultados " + results2);
-      fetchInstructions();
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
       if (error.response && error.response.data) {
@@ -367,7 +411,10 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
             </svg>
             Import
           </button>
-          <button className="py-2 px-4 rounded-md font-bold bg-white hover:bg-slate-50  flex">
+          <button
+            className="py-2 px-4 rounded-md font-bold bg-white hover:bg-slate-50  flex"
+            onClick={handleExport}
+          >
             <svg
               width="16"
               height="16"

@@ -33,12 +33,13 @@ const saveTests = async (req, res) => {
 
     const { instructions, testId } = req.body;
 
-    const instructionPromises = instructions.map((instruction, index) => {
+    for (let index = 0; index < instructions.length; index++) {
+      const instruction = instructions[index];
       const { action, searchKey, searchBy, textInput, status } = instruction;
 
       const testIdInt = parseInt(testId, 10);
 
-      return prisma.instructions.create({
+      const createdInstruction = await prisma.instructions.create({
         data: {
           testId: testIdInt,
           action,
@@ -49,16 +50,16 @@ const saveTests = async (req, res) => {
           instructionStatus: status,
         },
       });
-    });
 
-    const createdInstructions = await Promise.all(instructionPromises);
-    console.log("Created Instructions:", createdInstructions);
+      console.log("Created Instruction:", createdInstruction);
+    }
 
-    res.status(200);
+    res.status(200).json({ message: "Instrucciones creadas exitosamente" });
+    console.log("se envio todo bien");
   } catch (error) {
     console.error("Error during test execution:", error);
 
-    res.status(500);
+    res.status(500).json({ error: "Error al guardar las instrucciones" });
   } finally {
     await prisma.$disconnect();
   }
@@ -455,31 +456,25 @@ const deleteTest = async (req, res) => {
   const { testId } = req.params;
 
   try {
-    const tId = parseInt(testId, 10);
-    if (isNaN(tId)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid testId: Must be an integer." });
-    }
-
-    // Check if the test exists
-    const test = await prisma.tests.findUnique({
-      where: { testId: tId },
+    // Eliminar instrucciones relacionadas manualmente
+    await prisma.instructions.deleteMany({
+      where: { testId: parseInt(testId, 10) },
     });
 
-    if (!test) {
-      return res.status(404).json({ error: "Test not found" });
-    }
-
-    // Delete the test
-    await prisma.tests.delete({
-      where: { testId: tId },
+    // Eliminar el test
+    const deletedTest = await prisma.tests.delete({
+      where: { testId: parseInt(testId, 10) },
     });
+
+    // // Delete the test
+    // await prisma.tests.delete({
+    //   where: { testId: tId },
+    // });
 
     res.status(200).json({ message: "Test deleted successfully." });
   } catch (error) {
     console.error("Error deleting test:", error);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
   } finally {
     await prisma.$disconnect();
   }
