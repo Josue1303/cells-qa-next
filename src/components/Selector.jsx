@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [instructions, setInstructions] = useState([
@@ -17,8 +17,6 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   useEffect(() => {
     setTestId(tesId);
   }, [tesId]);
-
-  console.log(testId);
 
   const addInstruction = () => {
     setInstructions([
@@ -85,19 +83,41 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     setOverall("NP");
   };
 
-  const handleFallbackConfirmation = async (confirm) => {
+  const handleFallbackConfirmation = async (confirm, type) => {
+    var newSearchBy;
+    var newSearchKey;
     if (confirm) {
       const updatedInstructions = instructions.map((instruction, index) => {
+        console.log(index);
+        console.log(suggestedFallback.instructionIndex);
         if (index === suggestedFallback.instructionIndex) {
+          if (type === "id") {
+            newSearchBy = "id";
+            newSearchKey = suggestedFallback.fallback.id;
+          } else if (type === "name") {
+            newSearchBy = "name";
+            newSearchKey = suggestedFallback.fallback.name;
+          } else if (type === "css") {
+            newSearchBy = "css";
+            newSearchKey = suggestedFallback.fallback.className;
+          }
+
+          console.log(suggestedFallback.fallback);
+          console.log(instruction);
+          console.log(suggestedFallback.fallback.searchBy);
+          console.log(suggestedFallback.fallback.searchKey);
           return {
             ...instruction,
-            searchBy: suggestedFallback.fallback.searchBy,
-            searchKey: suggestedFallback.fallback.searchKey,
+            searchBy: newSearchBy,
+            searchKey: newSearchKey,
           };
         }
+        console.log(instruction);
         return instruction;
       });
       setInstructions(updatedInstructions);
+      // onInstructionsChange(updatedInstructions);
+      console.log(updatedInstructions);
     }
     setShowModal(false);
     setSuggestedFallback(null);
@@ -127,7 +147,9 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
         instruction.action === "click" &&
         (instruction.searchKey === "" || instruction.searchBy === "")
       ) {
-        setError(`Por favor llene todos los campos para la instrucción ${i + 1}.`);
+        setError(
+          `Por favor llene todos los campos para la instrucción ${i + 1}.`
+        );
         return;
       } else if (
         (instruction.action === "sendKeys" ||
@@ -137,7 +159,9 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
           instruction.searchBy === "" ||
           instruction.textInput === "")
       ) {
-        setError(`Por favor llene todos los campos para la instrucción ${i + 1}.`);
+        setError(
+          `Por favor llene todos los campos para la instrucción ${i + 1}.`
+        );
         return;
       }
     }
@@ -147,11 +171,14 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     console.log("Instrucciones:", instructions);
 
     try {
-      const response = await axios.post("http://localhost:3005/api/tests/run-test", {
-        testId,
-        instructions,
-        url,
-      });
+      const response = await axios.post(
+        "http://localhost:3005/api/tests/run-test",
+        {
+          testId,
+          instructions,
+          url,
+        }
+      );
 
       console.log("Test results:", response.data);
 
@@ -471,13 +498,25 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
               El match más parecido es:
             </p>
             <pre>{JSON.stringify(suggestedFallback.fallback, null, 2)}</pre>
-            <p>¿Deseas continuar con este selector?</p>
+            <p>Sustituir con: </p>
             <div className="mt-4">
               <button
                 className="px-4 py-2 bg-green-500 text-white rounded mr-4"
-                onClick={() => handleFallbackConfirmation(true)}
+                onClick={() => handleFallbackConfirmation(true, "id")}
               >
-                Aceptar
+                Id
+              </button>
+              <button
+                className="px-4 py-2 bg-green-500 text-white rounded mr-4"
+                onClick={() => handleFallbackConfirmation(true, "name")}
+              >
+                Name
+              </button>
+              <button
+                className="px-4 py-2 bg-green-500 text-white rounded mr-4"
+                onClick={() => handleFallbackConfirmation(true, "css")}
+              >
+                ClassName
               </button>
               <button
                 className="px-4 py-2 bg-red-500 text-white rounded"
