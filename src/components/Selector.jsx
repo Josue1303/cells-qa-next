@@ -222,13 +222,9 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
             fallback: result.fallback,
           });
           setShowModal(true);
+          updatedInstructions[index].status = "Failed";
         } else {
-          console.log("MIRA AQUI");
-          console.log(updatedInstructions);
-          console.log(updatedInstructions[index]);
-          updatedInstructions[index].status = "Passed";
-          console.log("Resultados de Selenium");
-          console.log(result.status);
+          updatedInstructions[index].status = result.status;
         }
       });
       setInstructions(updatedInstructions);
@@ -243,8 +239,6 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     }
 
     try {
-      console.log("Instrucciones enteras");
-      console.log(instructions);
       const newInstructions = instructions.filter((inst) => inst.isNew);
       const postInstructions = [...newInstructions];
       const noNewInstructions = [...instructions];
@@ -476,7 +470,10 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
                     className="px-2 text-center bg-green-500 rounded-md text-[#FFFFFF] w-20 h-10 py-2"
                     style={{
                       display:
-                        instruction.status === "Passed" ? "block" : "none",
+                        instruction.status === "Passed" ||
+                        instruction.status === true
+                          ? "block"
+                          : "none",
                     }}
                   >
                     <i className="bi bi-check text-bold text-3xl relative bottom-1"></i>
@@ -485,7 +482,10 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
                     className="px-2 text-center bg-red-600 rounded-md  text-[#FFFFFF] w-20 h-10 py-2"
                     style={{
                       display:
-                        instruction.status === "Failed" ? "block" : "none",
+                        instruction.status === "Failed" ||
+                        instruction.status === false
+                          ? "block"
+                          : "none",
                     }}
                   >
                     <i className="bi bi-x text-bold text-3xl relative bottom-1 stroke-2"></i>
