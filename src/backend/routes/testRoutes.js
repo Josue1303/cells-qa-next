@@ -10,5 +10,7 @@ router.post('/createTest', testController.createTest);
 router.get('/test-metrics/:directoryId', testController.calculateAllTestMetrics);
 router.get('/export-metrics/:directoryId', testController.exportTestMetricsToCSV);
 router.get('/individual-metrics/:testId', testController.exportIndividualTestMetricsToCSV);
+router.get('/get-all-tests/:testId', testController.getInstructionsByTestId);
+router.delete('/delete-test/:testId', testController.deleteTest);
 
 module.exports = router;

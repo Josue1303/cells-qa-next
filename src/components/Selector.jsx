@@ -2,10 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
-  const [instructions, setInstructions] = useState([
-    { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" },
-  ]);
-
+  const [instructions, setInstructions] = useState([]);
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [error2, setError2] = useState("");
@@ -18,12 +15,47 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     setTestId(tesId);
   }, [tesId]);
 
+  useEffect(() => {
+    if (testId) {
+      const fetchInstructions = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3005/api/tests/get-all-tests/${testId}`
+          );
+          setInstructions(
+            response.data.map((inst) => ({
+              ...inst,
+              status:
+                inst.instructionStatus === true
+                  ? "Passed"
+                  : inst.instructionStatus === false
+                  ? "Failed"
+                  : "NP",
+              isNew: false,
+            }))
+          );
+        } catch (error) {
+          console.error("Error fetching instructions:", error);
+          setError("Failed to fetch instructions.");
+        }
+      };
+
+      fetchInstructions();
+    }
+  }, [testId]);
+
   const addInstruction = () => {
     setInstructions([
       ...instructions,
-      { textInput: "", searchKey: "", searchBy: "", action: "", status: "NP" },
+      {
+        textInput: "",
+        searchKey: "",
+        searchBy: "",
+        action: "",
+        status: "NP",
+        isNew: true,
+      },
     ]);
-    console.log(instructions);
     setOverall("NP");
   };
 
@@ -171,11 +203,13 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     console.log("Instrucciones:", instructions);
 
     try {
+      const newInstructions = instructions.filter((inst) => inst.isNew);
+
       const response = await axios.post(
         "http://localhost:3005/api/tests/run-test",
         {
           testId,
-          instructions,
+          instructions: newInstructions,
           url,
         }
       );
@@ -183,7 +217,7 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       console.log("Test results:", response.data);
 
       const results = response.data.results;
-      const newInstructions = [...instructions];
+      const updatedInstructions = [...instructions];
 
       results.forEach((result, index) => {
         if (result.status === "Fallback") {
@@ -192,13 +226,14 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
             fallback: result.fallback,
           });
           setShowModal(true);
-          newInstructions[index].status = "Failed";
+          updatedInstructions[index].status = "Failed";
         } else {
-          newInstructions[index].status = result.status;
+          updatedInstructions[index].status = result.status;
         }
+        updatedInstructions[index].isNew = false;
       });
 
-      setInstructions(newInstructions);
+      setInstructions(updatedInstructions);
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
       if (error.response && error.response.data) {
