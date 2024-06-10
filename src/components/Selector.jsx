@@ -9,6 +9,9 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [overall, setOverall] = useState("NP");
   const [showModal, setShowModal] = useState(false);
   const [suggestedFallback, setSuggestedFallback] = useState(null);
+  const [pendingFallbacks, setPendingFallbacks] = useState([]);
+  const [currentFallbackIndex, setCurrentFallbackIndex] = useState(0);
+
   const [testId, setTestId] = useState(null);
 
   useEffect(() => {
@@ -120,37 +123,38 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     var newSearchKey;
     if (confirm) {
       const updatedInstructions = instructions.map((instruction, index) => {
-        console.log(index);
-        console.log(suggestedFallback.instructionIndex);
-        if (index === suggestedFallback.instructionIndex) {
+        if (index === pendingFallbacks[currentFallbackIndex].instructionIndex) {
           if (type === "id") {
             newSearchBy = "id";
-            newSearchKey = suggestedFallback.fallback.id;
+            newSearchKey = pendingFallbacks[currentFallbackIndex].fallback.id;
           } else if (type === "name") {
             newSearchBy = "name";
-            newSearchKey = suggestedFallback.fallback.name;
+            newSearchKey = pendingFallbacks[currentFallbackIndex].fallback.name;
           } else if (type === "css") {
             newSearchBy = "css";
-            newSearchKey = suggestedFallback.fallback.className;
+            newSearchKey =
+              pendingFallbacks[currentFallbackIndex].fallback.className;
           }
 
-          console.log(suggestedFallback.fallback);
-          console.log(instruction);
           return {
             ...instruction,
             searchBy: newSearchBy,
             searchKey: newSearchKey,
           };
         }
-        console.log(instruction);
         return instruction;
       });
+
       setInstructions(updatedInstructions);
-      // onInstructionsChange(updatedInstructions);
-      console.log(updatedInstructions);
     }
-    setShowModal(false);
-    setSuggestedFallback(null);
+
+    if (currentFallbackIndex + 1 < pendingFallbacks.length) {
+      setCurrentFallbackIndex(currentFallbackIndex + 1);
+    } else {
+      setShowModal(false);
+      setPendingFallbacks([]);
+      setCurrentFallbackIndex(0);
+    }
   };
 
   const handleInstructionsAndTest = async () => {
@@ -214,21 +218,27 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
 
       const results = response.data.results;
       const updatedInstructions = [...instructions];
+      const fallbacks = [];
 
       results.forEach((result, index) => {
         if (result.status === "Fallback") {
-          setSuggestedFallback({
+          fallbacks.push({
             instructionIndex: index,
             fallback: result.fallback,
           });
-          setShowModal(true);
           updatedInstructions[index].status = "Failed";
         } else {
           updatedInstructions[index].status = result.status;
         }
       });
+
       setInstructions(updatedInstructions);
-      console.log(updatedInstructions);
+
+      if (fallbacks.length > 0) {
+        setPendingFallbacks(fallbacks);
+        setCurrentFallbackIndex(0);
+        setShowModal(true);
+      }
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
       if (error.response && error.response.data) {
@@ -561,14 +571,20 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
         </div>
       </div>
 
-      {showModal && (
+      {showModal && pendingFallbacks.length > 0 && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded shadow">
             <p>
               No se pudo encontrar un componente con el selector proporcionado.
               El match más parecido es:
             </p>
-            <pre>{JSON.stringify(suggestedFallback.fallback, null, 2)}</pre>
+            <pre>
+              {JSON.stringify(
+                pendingFallbacks[currentFallbackIndex].fallback,
+                null,
+                2
+              )}
+            </pre>
             <p>Sustituir con: </p>
             <div className="mt-4">
               <button
