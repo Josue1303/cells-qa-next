@@ -1,6 +1,6 @@
 // page.jsx
 "use client";
-import Header from "@/components/TopBar";
+import Header from "@/components/Topbar"
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
