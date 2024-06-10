@@ -64,6 +64,51 @@ const saveTests = async (req, res) => {
   }
 };
 
+const updateInstruction = async (req, res) => {
+  const { instructionId } = req.params;
+  const {
+    action,
+    sequence,
+    searchKey,
+    searchBy,
+    textInput,
+    instructionStatus,
+  } = req.body;
+
+  try {
+    if (!instructionId) {
+      return res.status(400).json({ error: "instructionId is required" });
+    }
+
+    const instruction = await prisma.instructions.findUnique({
+      where: { instructionId: parseInt(instructionId, 10) },
+    });
+
+    if (!instruction) {
+      return res.status(404).json({ error: "Instruction not found" });
+    }
+
+    const updatedInstruction = await prisma.instructions.update({
+      where: { instructionId: parseInt(instructionId, 10) },
+      data: {
+        action,
+        sequence,
+        searchKey,
+        searchBy,
+        textInput,
+        instructionStatus,
+      },
+    });
+
+    res.status(200).json(updatedInstruction);
+  } catch (error) {
+    console.error("Error updating instruction:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
 const createTest = async (req, res) => {
   try {
     const { userId, directoryId, title } = req.body;
@@ -440,7 +485,43 @@ const deleteTest = async (req, res) => {
   }
 };
 
+const deleteInstruction = async (req, res) => {
+  const { instructionId } = req.params;
+
+  try {
+    const instId = parseInt(instructionId, 10);
+    if (isNaN(instId)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid instructionId: Must be an integer." });
+    }
+
+    // Check if the instruction exists
+    const instruction = await prisma.instructions.findUnique({
+      where: { instructionId: instId },
+    });
+
+    if (!instruction) {
+      return res.status(404).json({ error: "Instruction not found" });
+    }
+
+    // Delete the instruction
+    await prisma.instructions.delete({
+      where: { instructionId: instId },
+    });
+
+    res.status(200).json({ message: "Instruction deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting instruction:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
 module.exports = {
+  updateInstruction,
+  deleteInstruction,
   createTest,
   runTests,
   runTestsCSV,

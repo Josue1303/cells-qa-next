@@ -18,31 +18,31 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     setTestId(tesId);
   }, [tesId]);
 
+  const fetchInstructions = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3005/api/tests/get-all-tests/${testId}`
+      );
+      setInstructions(
+        response.data.map((inst) => ({
+          ...inst,
+          status:
+            inst.instructionStatus === true
+              ? "Passed"
+              : inst.instructionStatus === false
+              ? "Failed"
+              : "NP",
+          isNew: false,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching instructions:", error);
+      setError("Failed to fetch instructions.");
+    }
+  };
+
   useEffect(() => {
     if (testId) {
-      const fetchInstructions = async () => {
-        try {
-          const response = await axios.get(
-            `http://localhost:3005/api/tests/get-all-tests/${testId}`
-          );
-          setInstructions(
-            response.data.map((inst) => ({
-              ...inst,
-              status:
-                inst.instructionStatus === true
-                  ? "Passed"
-                  : inst.instructionStatus === false
-                  ? "Failed"
-                  : "NP",
-              isNew: false,
-            }))
-          );
-        } catch (error) {
-          console.error("Error fetching instructions:", error);
-          setError("Failed to fetch instructions.");
-        }
-      };
-
       fetchInstructions();
     }
   }, [testId]);
@@ -60,6 +60,23 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       },
     ]);
     setOverall("NP");
+  };
+
+  const updateOverallStatus = (instructions) => {
+    const allPassed = instructions.every(
+      (inst) => inst.status === "Passed" || inst.status === true
+    );
+    const anyFailed = instructions.some(
+      (inst) => inst.status === "Failed" || inst.status === false
+    );
+
+    if (allPassed) {
+      setOverall("Passed");
+    } else if (anyFailed) {
+      setOverall("Failed");
+    } else {
+      setOverall("NP");
+    }
   };
 
   const handleUrlChange = (e) => {
@@ -111,8 +128,23 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     setInstructions(newInstructions);
   };
 
-  const removeInstruction = (index) => {
+  const removeInstruction = async (index) => {
     const newInstructions = [...instructions];
+    console.log(newInstructions);
+    console.log(newInstructions[index].instructionId);
+
+    if (newInstructions[index].instructionId != undefined) {
+      console.log("Llegue tilin");
+      try {
+        const response = await axios.delete(
+          `http://localhost:3005/api/tests/delete-instruction/${newInstructions[index].instructionId}`
+        );
+      } catch (error) {
+        console.error("Error delete instruction:", error);
+        setError("Failed to delete instruction.");
+      }
+    }
+
     newInstructions.splice(index, 1);
     setInstructions(newInstructions);
     setOverall("NP");
@@ -233,6 +265,7 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       });
 
       setInstructions(updatedInstructions);
+      updateOverallStatus(updatedInstructions);
 
       if (fallbacks.length > 0) {
         setPendingFallbacks(fallbacks);
@@ -264,7 +297,7 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       for (let i = 0; i < noNewInstructions.length; i++) {
         noNewInstructions[i].isNew = false;
       }
-
+      console.log("Enviando a saveTest");
       const response2 = await axios.post(
         "http://localhost:3005/api/tests/save-test",
         {
@@ -272,10 +305,11 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
           instructions: postInstructions,
         }
       );
-      const results = response2.data.results;
-      console.log(results);
-      console.log("Instrucciones no nuevas");
-      setInstructions(noNewInstructions);
+
+      console.log("Terminando de enviar");
+      const results2 = response2.data.results;
+      console.log("Estos son los resultados " + results2);
+      fetchInstructions();
     } catch (error) {
       console.error("Error al ejecutar la prueba:", error);
       if (error.response && error.response.data) {
