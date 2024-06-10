@@ -313,25 +313,25 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       </div>
 
       <div className="flex justify-center">
-        <div className="bg-white rounded-md mx-10 w-full">
+        <div className="bg-white rounded-md mx-10 w-[1300px]">
           <div className="flex mx-5 my-4">
             <h3>No.</h3>
-            <div className="flex ml-5">
-              <h3 className="w-60 bg-white">Action</h3>
-              <h3 className="w-60 ml-2 bg-white">Search By</h3>
-              <h3 className="w-60 ml-2 bg-white">Search Key</h3>
-              <h3 className="w-60 ml-2 bg-white">Input</h3>
+            <div className="flex ml-[30px]">
+              <h3 className="w-[240px] bg-white">Action</h3>
+              <h3 className="w-[240px] ml-2 bg-white">Search By</h3>
+              <h3 className="w-[240px] ml-2 bg-white">Search Key</h3>
+              <h3 className="w-[240px] ml-2 bg-white">Input</h3>
             </div>
-            <div className="flex ml-7">
-              <h3 className="w-24 bg-white">Status</h3>
-              <h3 className="w-24 bg-white">Delete</h3>
+            <div className="flex ml-6">
+              <h3 className="w-[105px] bg-white">Status</h3>
+              <h3 className="w-[105px] bg-white">Delete</h3>
             </div>
           </div>
           {instructions.map((instruction, index) => (
-            <div key={index} className="justify-between w-full my-5">
+            <div key={index} className="justify-between w-[1300px] my-5">
               <div className="flex justify-center">
                 <div className="flex items-center w-full">
-                  <h3 className="font-bold w-4 mx-5 ml-6">{index + 1}</h3>
+                  <h3 className="font-bold w-5 mx-5 ml-6">{index + 1}</h3>
 
                   <div className="px-3">
                     <select
@@ -463,10 +463,10 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
                     NP
                   </div>
                 </div>
-                <div className="flex items-center mr-10">
+                <div className="flex items-center justify-center mr-10 ml-2">
                   <button
                     onClick={() => removeInstruction(index)}
-                    className=" w-20 text-gray-400 text-2xl first:hover:text-red-700"
+                    className=" w-[75px] text-gray-400 text-2xl first:hover:text-red-700"
                   >
                     <i className="bi bi-trash3-fill "></i>
                   </button>
