@@ -1,5 +1,5 @@
 //nomas es pa calar el componente pendejos de cagada
-import TestCircularProgressbar from '@/components/TestCircularProgressbar';
+import TestCircularProgressbar from '@/components/TestCircularProgressBar';
 import 'react-circular-progressbar/dist/styles.css';
 const TestPage = () => {
   return (
