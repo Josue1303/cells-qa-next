@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, {useRef, useEffect, useState } from "react";
 
 const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [instructions, setInstructions] = useState([]);
@@ -11,6 +11,8 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [suggestedFallback, setSuggestedFallback] = useState(null);
   const [pendingFallbacks, setPendingFallbacks] = useState([]);
   const [currentFallbackIndex, setCurrentFallbackIndex] = useState(0);
+
+  const fileInputRef = useRef(null);
 
   const [testId, setTestId] = useState(null);
 
@@ -62,6 +64,65 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     }
   };
 
+
+  const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async (e) => {
+    const contents = e.target.result;
+    await parseCSV(contents);
+  };
+
+  reader.readAsText(file);
+};
+
+  const parseCSV = async (csvContent) => {
+  const lines = csvContent.split('\n');
+  const headers = lines[0].split(',');
+  const newInstructions = [];
+  let extractedUrl = "";  // Variable para almacenar la URL extraída
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',');
+    const instruction = {};
+
+    for (let j = 0; j < headers.length; j++) {
+      const header = headers[j].trim();
+      let value = values[j].trim();
+
+      // Eliminar comillas si están presentes
+      if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.substring(1, value.length - 1);
+      }
+
+      // Asignar el valor a la propiedad correspondiente
+      instruction[header] = value;
+    }
+
+    // Si es la primera fila, extraer la URL
+    if (i === 1 && instruction.url) {
+      extractedUrl = instruction.url;
+    }
+
+    newInstructions.push(instruction);
+  }
+
+  // Eliminar todas las instrucciones existentes utilizando removeInstruction
+  await Promise.all(
+    instructions.map((_, index) => removeInstruction(instructions.length - 1 - index))
+  );
+
+  // Establecer la URL y las nuevas instrucciones en el estado
+  setUrl(extractedUrl);  // Establece la URL extraída
+  setInstructions(newInstructions.map(inst => ({
+    ...inst,
+    isNew: true,  // Asumir que todas las nuevas instrucciones son nuevas
+    status: 'NP' // Estado inicial para nuevas instrucciones
+  })));
+};
+
+  
   const updateInstruction = async (instruction) => {
     try {
       const response = await axios.put(
@@ -390,7 +451,15 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       <div className="flex justify-between">
         <h2 className="my-5">Instructions:</h2>
         <div className="flex items-center mr-10">
-          <button className="py-2 px-4 rounded-md font-bold border-none mr-5 bg-white hover:bg-slate-50 flex">
+          <input
+  type="file"
+  accept=".csv"
+  onChange={handleFileUpload}
+  style={{ display: 'none' }}
+  ref={fileInputRef}
+/>
+          <button className="py-2 px-4 rounded-md font-bold border-none mr-5 bg-white hover:bg-slate-50 flex"   onClick={() => fileInputRef.current.click()}
+>
             <svg
               width="17"
               height="17"
