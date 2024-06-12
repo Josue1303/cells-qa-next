@@ -1,5 +1,7 @@
 import axios from "axios";
 import React, {useRef, useEffect, useState } from "react";
+import { TailSpin } from 'react-loader-spinner';
+
 
 const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [instructions, setInstructions] = useState([]);
@@ -13,7 +15,7 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
   const [currentFallbackIndex, setCurrentFallbackIndex] = useState(0);
 
   const fileInputRef = useRef(null);
-
+  const [loading, setLoading] = useState(false);
   const [testId, setTestId] = useState(null);
 
   useEffect(() => {
@@ -290,7 +292,8 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     }
   };
 
-  const handleInstructionsAndTest = async () => {
+
+const handleInstructionsAndTest = async () => {
     if (url === "") {
       setError2("Por favor ingrese la URL.");
       return;
@@ -334,6 +337,7 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
     }
 
     setError("");
+    setLoading(true); // Set loading to true at the start of the process
 
     try {
       const response = await axios.post(
@@ -422,11 +426,18 @@ const Selector = ({ onInstructionsChange, onUrlChange, tesId }) => {
       } else {
         setError("Error al ejecutar la prueba.");
       }
+    } finally {
+      setLoading(false); // Set loading to false at the end of the process, regardless of success or failure
     }
   };
-
+  
   return (
     <div>
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <TailSpin color="#00BFFF" height={80} width={80} />
+    </div>
+      )}
       <div>
         <div className="flex justify-start items-center py-5 mr-24">
           <label htmlFor="urlInput" className="mr-3">
